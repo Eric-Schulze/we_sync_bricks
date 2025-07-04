@@ -1,0 +1,22 @@
+<!-- Right Sidebar Template -->
+{{define "right-sidebar"}}
+<aside class="fixed inset-y-0 right-0 hidden w-96 overflow-y-auto border-l border-gray-200 px-4 py-6 sm:px-6 lg:px-8 xl:block">
+    <div class="space-y-6">
+        <!-- Quick Stats -->
+        <div class="rounded-lg bg-white p-6 shadow">
+            <h3 class="text-lg font-medium text-gray-900">Quick Stats</h3>
+            <div class="mt-4" hx-get="/dashboard/stats" hx-trigger="load" hx-swap="innerHTML">
+                <!-- Stats will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="rounded-lg bg-white p-6 shadow">
+            <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
+            <div class="mt-4" hx-get="/dashboard/activity?limit=5" hx-trigger="load" hx-swap="innerHTML">
+                <!-- Activity will be loaded here -->
+            </div>
+        </div>
+    </div>
+</aside>
+{{end}}

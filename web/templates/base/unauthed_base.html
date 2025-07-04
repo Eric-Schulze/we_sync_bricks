@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - WE Sync Bricks</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Alpine.js for interactive components -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/base.css">
+    
+    <script>
+        // Configure Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'lego-red': '#d40000',
+                        'lego-yellow': '#ffc70a',
+                        'lego-blue': '#0066cc',
+                        'lego-green': '#00852b',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full">
+    {{template "content"}}
+</body>
+</html>

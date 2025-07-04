@@ -1,0 +1,71 @@
+<!-- Navigation Template -->
+{{define "navigation"}}
+<div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+    <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
+        <!-- Logo -->
+        <div class="flex h-16 shrink-0 items-center">
+            <img class="h-8 w-8 rounded-sm" src="/static/images/temp_logo.png" alt="WE Sync Bricks Logo" />
+            <span class="ml-3 text-xl font-bold text-gray-900">WE Sync Bricks</span>
+        </div>
+        
+        <!-- Navigation Menu -->
+        <nav class="flex flex-1 flex-col">
+            <ul role="list" class="flex flex-1 flex-col gap-y-7">
+                <li>
+                    <ul role="list" class="-mx-2 space-y-1">
+                        <li>
+                            <a href="/" class="{{if eq .CurrentPage "dashboard"}}bg-gray-50 text-lego-blue{{else}}text-gray-700 hover:text-lego-blue hover:bg-gray-50{{end}} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                               hx-get="/" hx-target="main" hx-push-url="true">
+                                <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                                </svg>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/partial-minifigs-lists" class="{{if eq .CurrentPage "lists"}}bg-gray-50 text-lego-blue{{else}}text-gray-700 hover:text-lego-blue hover:bg-gray-50{{end}} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                               hx-get="/partial-minifigs-lists" hx-target="main" hx-push-url="true">
+                                <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                                My Lists
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/catalog" class="{{if eq .CurrentPage "catalog"}}bg-gray-50 text-lego-blue{{else}}text-gray-700 hover:text-lego-blue hover:bg-gray-50{{end}} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
+                                <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                </svg>
+                                Catalog
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/import" class="{{if eq .CurrentPage "import"}}bg-gray-50 text-lego-blue{{else}}text-gray-700 hover:text-lego-blue hover:bg-gray-50{{end}} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
+                                <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                                </svg>
+                                Import
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <!-- Settings Section -->
+                <li class="mt-auto">
+                    <ul role="list" class="-mx-2 space-y-1">
+                        <li>
+                            <a href="/profile" class="{{if eq .CurrentPage "profile"}}bg-gray-50 text-lego-blue{{else}}text-gray-700 hover:text-lego-blue hover:bg-gray-50{{end}} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                               hx-get="/profile" hx-target="main" hx-push-url="true">
+                                <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Profile
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,11 @@
+{{template "unauthed_base.html"}}
+
+{{define "login-page-content"}}
+<div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
+    {{template "login-content" . }}
+</div>
+{{end}}
+
+{{define "content"}}
+{{template "login-page-content" .}}
+{{end}}

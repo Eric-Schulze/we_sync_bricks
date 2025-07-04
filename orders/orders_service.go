@@ -2,25 +2,26 @@ package orders
 
 import ()
 
-type OrdersClient interface {
+type Orders interface {
 	GetOrders() (string, error)
 }
 
 type OrdersService struct {
-	client OrdersClient
+	orders Orders
 }
 
-func NewOrdersService(c OrdersClient) *OrdersService {
+func NewOrdersClient(c Orders) (*OrdersService, error) {
 	return &OrdersService{
-		client: c,
-	}
+		orders: c,
+	}, nil
 }
 
 func (service *OrdersService) GetOrders() (string, error){
-	var orders, err = service.client.GetOrders()
+	var orders, err = service.orders.GetOrders()
 	if err != nil {
 		return "", err
 	}
 
 	return orders, nil
 }
+

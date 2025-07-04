@@ -1,0 +1,115 @@
+{{define "partial-minifig-list-page"}}
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - WE Sync Bricks</title>
+    
+    <!-- Tailwind CSS (Built) -->
+    <link rel="stylesheet" href="/static/css/dist/main.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Alpine.js for interactive components -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="h-full">
+    <div class="min-h-full">
+        <!-- Navigation -->
+        {{template "navigation" .}}
+        
+        <!-- Page Wrapper -->
+        <div class="lg:pl-72">
+            <!-- Main Content -->
+            <div class="xl:pr-96">
+                <!-- Page Header -->
+                {{template "page-header" .}}
+                
+                <!-- Main Content Area -->
+                <main class="px-4 py-10 sm:px-6 lg:px-8 lg:py-6">
+                    {{template "partial-minifig-list-content" .}}
+                </main>
+
+                <!-- Page Footer -->
+                {{template "page-footer" .}}
+            </div>
+        </div>
+        
+        <!-- Right Sidebar -->
+        {{template "right-sidebar" .}}
+    </div>
+    
+    <!-- Notifications -->
+    <div id="notifications" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    
+    <!-- Modal container for HTMX responses -->
+    <div id="modal-container"></div>
+    
+    <!-- Custom JavaScript -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
+{{end}}
+
+{{define "partial-minifig-list-content"}}
+<div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <a href="/partial-minifigs-lists" 
+               hx-get="/partial-minifigs-lists" 
+               hx-target="main" 
+               hx-swap="innerHTML"
+               hx-push-url="/partial-minifigs-lists"
+               style="color: #2563eb; text-decoration: none; font-size: 0.875rem;">
+                ← Back to Lists
+            </a>
+            <h1 style="margin-top: 0.5rem;">{{.List.Name}}</h1>
+            <p style="color: #6b7280; margin-top: 0.25rem;">{{if .List.Description}}{{.List.Description}}{{end}}</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" 
+                    hx-get="/partial-minifigs-lists/{{.List.ID}}/edit" 
+                    hx-target="#modal-container" 
+                    hx-swap="innerHTML">
+                Edit List
+            </button>
+            <button class="btn" 
+                    hx-get="/partial-minifigs-lists/{{.List.ID}}/partial-minifig/new" 
+                    hx-target="#modal-container" 
+                    hx-swap="innerHTML">
+                Add Item
+            </button>
+        </div>
+    </div>
+    
+    <div id="list-items">
+        {{if .List.PartialMinifigs}}
+            <h2 style="margin-bottom: 1rem; color: #374151;">Items</h2>
+            {{range .List.PartialMinifigs}}
+                {{template "partial_minifig_card" .}}
+            {{end}}
+        {{else}}
+            <div style="text-align: center; padding: 3rem; color: #6b7280;">
+                <p>This list is empty. Add some items to get started!</p>
+            </div>
+        {{end}}
+    </div>
+</div>
+{{end}}
+
+{{define "list-items-section"}}
+<div id="list-items">
+    {{if .List.PartialMinifigs}}
+        <h2 style="margin-bottom: 1rem; color: #374151;">Items</h2>
+        {{range .List.PartialMinifigs}}
+            {{template "partial_minifig_card" .}}
+        {{end}}
+    {{else}}
+        <div style="text-align: center; padding: 3rem; color: #6b7280;">
+            <p>This list is empty. Add some items to get started!</p>
+        </div>
+    {{end}}
+</div>
+{{end}}

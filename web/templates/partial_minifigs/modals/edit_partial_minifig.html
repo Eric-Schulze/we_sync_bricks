@@ -1,0 +1,33 @@
+{{define "edit-item-modal"}}
+<div class="modal-overlay" hx-on:click="if(event.target === this) this.remove()">
+    <div class="modal">
+        <h2>Edit Item</h2>
+        <form hx-put="/partial-minifigs-lists/{{.ListID}}/partial-minifig/{{.Item.ID}}" 
+              hx-target="#list-items" 
+              hx-swap="outerHTML"
+              hx-on::after-request="document.getElementById('modal-container').innerHTML = ''">
+            
+            <div class="form-group">
+                <label for="name">Item Name</label>
+                <input type="text" id="name" name="name" value="{{.Item.Name}}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description">{{.Item.Description}}</textarea>
+            </div>
+            
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" 
+                        onclick="document.getElementById('modal-container').innerHTML = ''">
+                    Cancel
+                </button>
+                <button type="submit" class="btn">
+                    <span class="htmx-indicator"><span class="spinner"></span></span>
+                    Update Item
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}

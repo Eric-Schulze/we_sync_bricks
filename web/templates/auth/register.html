@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - WE Sync Bricks</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Alpine.js for interactive components -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <script>
+        // Configure Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'lego-red': '#d40000',
+                        'lego-yellow': '#ffc70a',
+                        'lego-blue': '#0066cc',
+                        'lego-green': '#00852b',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full">
+    {{template "register-content" .}}
+</body>
+</html>
+
+{{define "register-content"}}
+<div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <!-- Logo -->
+        <div class="flex justify-center">
+            <div class="h-12 w-12 bg-lego-red rounded-sm"></div>
+        </div>
+        <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+            Create your account
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+            Already have an account? 
+            <a href="/auth/login" 
+               class="font-medium text-lego-blue hover:text-blue-700"
+               hx-get="/auth/login" 
+               hx-target="body" 
+               hx-push-url="true">
+                Sign in
+            </a>
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form id="register-form" 
+                  hx-post="/auth/register" 
+                  hx-trigger="submit" 
+                  hx-indicator="#loading-indicator"
+                  class="space-y-6">
+                
+                <!-- Username field -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">
+                        Username
+                    </label>
+                    <div class="mt-1">
+                        <input id="username" 
+                               name="username" 
+                               type="text" 
+                               autocomplete="username" 
+                               required
+                               class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-lego-blue focus:outline-none focus:ring-lego-blue sm:text-sm"
+                               placeholder="Choose a username">
+                    </div>
+                </div>
+
+                <!-- Name fields -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="first_name" class="block text-sm font-medium text-gray-700">
+                            First name
+                        </label>
+                        <div class="mt-1">
+                            <input id="first_name" 
+                                   name="first_name" 
+                                   type="text" 
+                                   autocomplete="given-name"
+                                   class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-lego-blue focus:outline-none focus:ring-lego-blue sm:text-sm"
+                                   placeholder="First name">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="last_name" class="block text-sm font-medium text-gray-700">
+                            Last name
+                        </label>
+                        <div class="mt-1">
+                            <input id="last_name" 
+                                   name="last_name" 
+                                   type="text" 
+                                   autocomplete="family-name"
+                                   class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-lego-blue focus:outline-none focus:ring-lego-blue sm:text-sm"
+                                   placeholder="Last name">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email field -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">
+                        Email address
+                    </label>
+                    <div class="mt-1">
+                        <input id="email" 
+                               name="email" 
+                               type="email" 
+                               autocomplete="email" 
+                               required
+                               class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-lego-blue focus:outline-none focus:ring-lego-blue sm:text-sm"
+                               placeholder="Enter your email">
+                    </div>
+                </div>
+
+                <!-- Password field -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">
+                        Password
+                    </label>
+                    <div class="mt-1">
+                        <input id="password" 
+                               name="password" 
+                               type="password" 
+                               autocomplete="new-password" 
+                               required
+                               minlength="8"
+                               class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-lego-blue focus:outline-none focus:ring-lego-blue sm:text-sm"
+                               placeholder="Create a password">
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">
+                        Password must meet security requirements (mix of uppercase, lowercase, numbers, and symbols).
+                    </p>
+                </div>
+
+                <!-- Confirm Password field -->
+                <div>
+                    <label for="confirm_password" class="block text-sm font-medium text-gray-700">
+                        Confirm password
+                    </label>
+                    <div class="mt-1">
+                        <input id="confirm_password" 
+                               name="confirm_password" 
+                               type="password" 
+                               autocomplete="new-password" 
+                               required
+                               class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-lego-blue focus:outline-none focus:ring-lego-blue sm:text-sm"
+                               placeholder="Confirm your password">
+                    </div>
+                </div>
+
+                <!-- Terms and Privacy -->
+                <div class="flex items-center">
+                    <input id="agree-terms" 
+                           name="agree-terms" 
+                           type="checkbox" 
+                           required
+                           class="h-4 w-4 rounded border-gray-300 text-lego-blue focus:ring-lego-blue">
+                    <label for="agree-terms" class="ml-2 block text-sm text-gray-900">
+                        I agree to the 
+                        <a href="#" class="text-lego-blue hover:text-blue-700">Terms of Service</a>
+                        and 
+                        <a href="#" class="text-lego-blue hover:text-blue-700">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <!-- Submit button -->
+                <div>
+                    <button type="submit"
+                            class="flex w-full justify-center rounded-md border border-transparent bg-lego-blue py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-lego-blue focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span class="htmx-indicator" id="loading-indicator">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                        Create account
+                    </button>
+                </div>
+
+                <!-- Error message container -->
+                <div id="error-message" class="hidden">
+                    <div class="rounded-md bg-red-50 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">
+                                    Registration failed
+                                </h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <p id="error-text">Please check your information and try again.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success message container -->
+                <div id="success-message" class="hidden">
+                    <div class="rounded-md bg-green-50 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-green-800">
+                                    Account created successfully!
+                                </h3>
+                                <div class="mt-2 text-sm text-green-700">
+                                    <p>Redirecting to login page...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Password confirmation validation
+    function validatePasswords() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const confirmInput = document.getElementById('confirm_password');
+        
+        if (confirmPassword && password !== confirmPassword) {
+            confirmInput.setCustomValidity('Passwords do not match');
+            confirmInput.classList.add('border-red-300', 'focus:border-red-500', 'focus:ring-red-500');
+            confirmInput.classList.remove('border-gray-300', 'focus:border-lego-blue', 'focus:ring-lego-blue');
+        } else {
+            confirmInput.setCustomValidity('');
+            confirmInput.classList.remove('border-red-300', 'focus:border-red-500', 'focus:ring-red-500');
+            confirmInput.classList.add('border-gray-300', 'focus:border-lego-blue', 'focus:ring-lego-blue');
+        }
+    }
+
+    document.getElementById('password').addEventListener('input', validatePasswords);
+    document.getElementById('confirm_password').addEventListener('input', validatePasswords);
+
+    // Handle form errors
+    document.body.addEventListener('htmx:responseError', function(evt) {
+        const errorDiv = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        
+        // Try to get the server error message
+        let errorMessage = 'An error occurred during registration. Please try again.';
+        try {
+            errorMessage = evt.detail.xhr.responseText || errorMessage;
+        } catch (e) {
+            // Fall back to status-based messages
+            if (evt.detail.xhr.status === 400) {
+                errorMessage = 'Please check that all required fields are filled out correctly.';
+            } else if (evt.detail.xhr.status === 409) {
+                errorMessage = 'An account with this email or username already exists.';
+            }
+        }
+        
+        errorText.textContent = errorMessage;
+        errorDiv.classList.remove('hidden');
+        
+        // Hide error after 8 seconds for password validation messages
+        setTimeout(() => {
+            errorDiv.classList.add('hidden');
+        }, 8000);
+    });
+
+    // Handle successful registration
+    document.body.addEventListener('htmx:beforeRequest', function(evt) {
+        // Hide any existing messages
+        document.getElementById('error-message').classList.add('hidden');
+        document.getElementById('success-message').classList.add('hidden');
+    });
+
+    // Show success message on successful response
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        if (evt.detail.xhr.status === 200) {
+            document.getElementById('success-message').classList.remove('hidden');
+        }
+    });
+
+    // Hide messages when user starts typing
+    document.addEventListener('input', function(evt) {
+        if (evt.target.matches('input[type="text"], input[type="email"], input[type="password"]')) {
+            document.getElementById('error-message').classList.add('hidden');
+        }
+    });
+</script>
+{{end}}

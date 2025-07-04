@@ -1,0 +1,21 @@
+{{ define "partial_minifigs_list_card" }}
+<div class="list-item" 
+     hx-get="/partial-minifigs-lists/{{.ID}}" 
+     hx-target="main" 
+     hx-swap="innerHTML"
+     hx-push-url="/partial-minifigs-lists/{{.ID}}"
+     style="cursor: pointer;">
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+        <div style="flex: 1;">
+            <h3>{{ .Name }}</h3>
+            <p>{{if .Description}}{{.Description}}{{end}}</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="text-align: right; color: #6b7280; font-size: 0.875rem;">
+                <div style="font-weight: 600; color: #374151;">{{len .PartialMinifigs}}</div>
+                <div>{{if eq (len .PartialMinifigs) 1}}item{{else}}items{{end}}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

@@ -1,0 +1,32 @@
+{{define "new-partial-minfig-list-modal"}}
+<div class="modal-overlay" hx-on:click="if(event.target === this) this.remove()">
+    <div class="modal">
+        <h2>Create New List</h2>
+        <form hx-post="/partial-minifigs-lists"
+              hx-on::after-request="document.getElementById('modal-container').innerHTML = ''"
+              hx-on::response-error="alert('Error creating list: ' + event.detail.xhr.responseText)">
+            
+            <div class="form-group">
+                <label for="name">List Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description"></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" 
+                        onclick="document.getElementById('modal-container').innerHTML = ''">
+                    Cancel
+                </button>
+                <button type="submit" class="btn">
+                    <span class="htmx-indicator"><span class="spinner"></span></span>
+                    Create List
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}

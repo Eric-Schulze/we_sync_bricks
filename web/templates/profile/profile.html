@@ -1,0 +1,30 @@
+{{template "authed_base.html" .}}
+
+{{define "profile-page-content"}}
+<div id="profile-content" hx-get="/profile" hx-trigger="load" hx-swap="innerHTML">
+    <!-- Profile content will be loaded here -->
+    <div class="animate-pulse">
+        <div class="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+        <div class="bg-white shadow rounded-lg">
+            <div class="p-6">
+                <div class="flex items-center space-x-6 mb-6">
+                    <div class="h-24 w-24 bg-gray-200 rounded-full"></div>
+                    <div class="space-y-2">
+                        <div class="h-6 bg-gray-200 rounded w-32"></div>
+                        <div class="h-4 bg-gray-200 rounded w-48"></div>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="h-4 bg-gray-200 rounded w-full"></div>
+                    <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "content"}}
+{{template "profile-page-content" .}}
+{{end}}
