@@ -18,7 +18,6 @@ import (
 	"github.com/eric-schulze/we_sync_bricks/partial_minifigs"
 )
 
-
 func Start(ctx context.Context, w io.Writer, args []string) error {
 	// Create a root context with cancellation
 	rootCtx, cancel := context.WithCancel(ctx)
@@ -81,14 +80,14 @@ func initApp(context context.Context) (*models.App, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Parse all templates at once to share the namespace
 	templates := template.Must(template.New("").Funcs(GetCustomTemplateFunctions()).ParseFiles(templateFiles...))
 	app.Templates = templates
 
 	// Initialize service handlers
 	jwtSecret := []byte("your-jwt-secret-key") // TODO: Move to config
-	
+
 	app.AuthHandler = auth.InitializeAuthHandler(dbService, templates, jwtSecret)
 	app.ProfileHandler = profile.InitializeProfileHandler(dbService, templates, jwtSecret)
 	app.PartialMinifigHandler = partial_minifigs.InitializePartialMinifigHandler(dbService, templates, jwtSecret)

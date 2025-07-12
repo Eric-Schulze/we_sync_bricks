@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/models"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -42,10 +42,10 @@ func (m *MockAuthRepository) CreateUser(req *RegisterRequest) (*models.User, err
 	}
 
 	user := &models.User{
-		ID:       m.nextUserID,
-		Username: req.Username,
-		Email:    req.Email,
-		Password: req.Password,
+		ID:        m.nextUserID,
+		Username:  req.Username,
+		Email:     req.Email,
+		Password:  req.Password,
 		CreatedAt: time.Now(),
 	}
 
@@ -397,10 +397,10 @@ func TestAuthService_Login(t *testing.T) {
 			setup: func(repo *MockAuthRepository) {
 				hash, _ := bcrypt.GenerateFromPassword([]byte("StrongPass123!"), bcrypt.DefaultCost)
 				user := &models.User{
-					ID:       1,
-					Username: "testuser",
-					Email:    "test@example.com",
-					Password: string(hash),
+					ID:        1,
+					Username:  "testuser",
+					Email:     "test@example.com",
+					Password:  string(hash),
 					CreatedAt: time.Now(),
 				}
 				repo.AddUser(user)
@@ -414,10 +414,10 @@ func TestAuthService_Login(t *testing.T) {
 			setup: func(repo *MockAuthRepository) {
 				hash, _ := bcrypt.GenerateFromPassword([]byte("StrongPass123!"), bcrypt.DefaultCost)
 				user := &models.User{
-					ID:       1,
-					Username: "testuser",
-					Email:    "test@example.com",
-					Password: string(hash),
+					ID:        1,
+					Username:  "testuser",
+					Email:     "test@example.com",
+					Password:  string(hash),
 					CreatedAt: time.Now(),
 				}
 				repo.AddUser(user)
@@ -455,10 +455,10 @@ func TestAuthService_Login(t *testing.T) {
 			setup: func(repo *MockAuthRepository) {
 				hash, _ := bcrypt.GenerateFromPassword([]byte("StrongPass123!"), bcrypt.DefaultCost)
 				user := &models.User{
-					ID:       1,
-					Username: "testuser",
-					Email:    "test@example.com",
-					Password: string(hash),
+					ID:        1,
+					Username:  "testuser",
+					Email:     "test@example.com",
+					Password:  string(hash),
 					CreatedAt: time.Now(),
 				}
 				repo.AddUser(user)
@@ -522,9 +522,9 @@ func TestAuthService_ValidateToken(t *testing.T) {
 
 	// Add a test user
 	user := &models.User{
-		ID:       1,
-		Username: "testuser",
-		Email:    "test@example.com",
+		ID:        1,
+		Username:  "testuser",
+		Email:     "test@example.com",
 		CreatedAt: time.Now(),
 	}
 	repo.AddUser(user)
@@ -551,18 +551,18 @@ func TestAuthService_ValidateToken(t *testing.T) {
 	}
 
 	tests := []struct {
-		name        string
-		token       string
-		setup       func()
-		wantErr     bool
-		expectedID  int64
+		name       string
+		token      string
+		setup      func()
+		wantErr    bool
+		expectedID int64
 	}{
 		{
-			name:        "valid token",
-			token:       validToken,
-			setup:       func() {},
-			wantErr:     false,
-			expectedID:  1,
+			name:       "valid token",
+			token:      validToken,
+			setup:      func() {},
+			wantErr:    false,
+			expectedID: 1,
 		},
 		{
 			name:    "empty token",

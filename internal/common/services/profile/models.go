@@ -17,11 +17,11 @@ type PasswordChangeRequest struct {
 
 // APIKeyUpdateRequest represents the API key update form data
 type APIKeyUpdateRequest struct {
-	Provider        string `json:"provider" form:"provider"`
-	ConsumerKey     string `json:"consumer_key" form:"consumer_key"`
-	ConsumerSecret  string `json:"consumer_secret" form:"consumer_secret"`
-	Token           string `json:"token" form:"token"`
-	TokenSecret     string `json:"token_secret" form:"token_secret"`
+	Provider       string `json:"provider" form:"provider"`
+	ConsumerKey    string `json:"consumer_key" form:"consumer_key"`
+	ConsumerSecret string `json:"consumer_secret" form:"consumer_secret"`
+	Token          string `json:"token" form:"token"`
+	TokenSecret    string `json:"token_secret" form:"token_secret"`
 }
 
 // ProfileResponse represents the response data for profile operations
@@ -44,7 +44,7 @@ type UserOAuthCredential struct {
 
 // ProfileData represents complete profile data including OAuth credentials
 type ProfileData struct {
-	User               *User                  `json:"user"`
+	User                 *User                `json:"user"`
 	BricklinkCredentials *UserOAuthCredential `json:"bricklink_credentials,omitempty"`
 	BrickowlCredentials  *UserOAuthCredential `json:"brickowl_credentials,omitempty"`
 }

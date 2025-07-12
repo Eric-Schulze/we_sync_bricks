@@ -34,19 +34,19 @@ func (c *ConsoleOutput) Write(entry LogEntry) error {
 	} else {
 		levelStr = entry.Level.String()
 	}
-	
+
 	// Format timestamp
 	timestamp := entry.Timestamp.Format("2006-01-02 15:04:05")
-	
+
 	// Build the main log line
 	logLine := fmt.Sprintf("[%s] %s %s", timestamp, levelStr, entry.Message)
-	
+
 	// Add fields if any
 	if len(entry.Fields) > 0 {
 		fieldsStr := c.formatFields(entry.Fields)
 		logLine += " " + fieldsStr
 	}
-	
+
 	// Write to appropriate stream (stderr for errors, stdout for others)
 	var output *os.File
 	if entry.Level >= LogError {
@@ -54,7 +54,7 @@ func (c *ConsoleOutput) Write(entry LogEntry) error {
 	} else {
 		output = os.Stdout
 	}
-	
+
 	_, err := fmt.Fprintln(output, logLine)
 	return err
 }
@@ -69,14 +69,14 @@ func (c *ConsoleOutput) colorizeLevel(level LogLevel) string {
 	if !c.colorEnabled {
 		return level.String()
 	}
-	
+
 	switch level {
 	case LogDebug:
 		return "\033[36mDEBUG\033[0m" // Cyan
 	case LogInfo:
-		return "\033[32mINFO\033[0m"  // Green
+		return "\033[32mINFO\033[0m" // Green
 	case LogWarn:
-		return "\033[33mWARN\033[0m"  // Yellow
+		return "\033[33mWARN\033[0m" // Yellow
 	case LogError:
 		return "\033[31mERROR\033[0m" // Red
 	default:
@@ -89,20 +89,20 @@ func (c *ConsoleOutput) formatFields(fields map[string]interface{}) string {
 	if len(fields) == 0 {
 		return ""
 	}
-	
+
 	// Sort keys for consistent output
 	keys := make([]string, 0, len(fields))
 	for k := range fields {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	
+
 	// Build key=value pairs
 	pairs := make([]string, 0, len(fields))
 	for _, key := range keys {
 		value := fields[key]
 		pairs = append(pairs, fmt.Sprintf("%s=%v", key, value))
 	}
-	
+
 	return strings.Join(pairs, " ")
 }

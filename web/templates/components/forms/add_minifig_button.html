@@ -1,0 +1,14 @@
+{{define "add-minifig-button"}}
+<div style="margin-top: 1rem; text-align: center;">
+    <div id="error-message-{{.ItemNo}}" style="color: #ef4444; font-size: 0.875rem; margin-bottom: 0.5rem; display: none;"></div>
+    <button type="button" 
+            id="add-minifig-{{.ItemNo}}"
+            onclick="addMinifigAndParts('{{.ItemNo}}')"
+            style="background-color: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s;"
+            onmouseover="this.style.backgroundColor='#2563eb'"
+            onmouseout="this.style.backgroundColor='#3b82f6'"
+            disabled>
+        {{.ButtonText | default "Add Minifig and Parts"}}
+    </button>
+</div>
+{{end}}

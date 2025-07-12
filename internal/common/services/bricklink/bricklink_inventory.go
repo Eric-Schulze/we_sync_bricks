@@ -2,6 +2,7 @@ package bricklink
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/eric-schulze/we_sync_bricks/utils/oauth"
 )
@@ -30,7 +31,7 @@ func (blClient BricklinkInventoryClient) GetInventory() (string, error) {
 	}
 
 	if response.Meta.Code != 200 {
-		return "", errors.New("failed to get orders: " + string(response.Meta.Code) + " " + response.Meta.Message)
+		return "", errors.New("failed to get orders: " + strconv.Itoa(response.Meta.Code) + " " + response.Meta.Message)
 	}
 
 	return response.responseStr, nil

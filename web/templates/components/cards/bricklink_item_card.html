@@ -1,0 +1,25 @@
+{{define "bricklink-item-card"}}
+<div class="search-result minifig-card" style="padding: 1.5rem; border: 2px solid #e5e7eb; border-radius: 12px; background-color: white; margin: 1rem 0;">
+    <!-- Top Section: Picture and Basic Info -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+        {{template "minifig-picture" (dict "ItemNo" .Item.No)}}
+        {{template "minifig-info" (dict "Name" .Item.Name "ItemNo" .Item.No)}}
+    </div>
+    
+    <!-- Parts List Section -->
+    {{template "parts-list-container" (dict "ItemNo" .Item.No)}}
+    
+    <!-- Add Minifig Button -->
+    {{template "add-minifig-button" (dict "ItemNo" .Item.No)}}
+</div>
+
+{{template "bricklink-item-scripts" .}}
+
+<script>
+// Auto-load details when this specific item is rendered
+(function() {
+    const itemId = '{{.Item.No}}';
+    initializeBricklinkItem(itemId);
+})();
+</script>
+{{end}}

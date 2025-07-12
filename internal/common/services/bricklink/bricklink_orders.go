@@ -3,6 +3,7 @@ package bricklink
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/eric-schulze/we_sync_bricks/utils/oauth"
 )
@@ -14,12 +15,11 @@ type BricklinkOrdersClient struct {
 }
 
 type BLOrder struct {
-
 }
 
 type BLOrders struct {
 	Orders []BLOrder
-	Count int
+	Count  int
 }
 
 func NewBricklinkOrdersClient() BricklinkOrdersClient {
@@ -42,10 +42,8 @@ func (blClient BricklinkOrdersClient) GetOrders() (string, error) {
 
 	if response.Meta.Code != 200 {
 		fmt.Println(response.Meta.Code)
-		return "", errors.New("failed to get orders: " + string(response.Meta.Code) + " " + response.Meta.Message)
+		return "", errors.New("failed to get orders: " + strconv.Itoa(response.Meta.Code) + " " + response.Meta.Message)
 	}
 
 	return response.responseStr, nil
 }
-
-

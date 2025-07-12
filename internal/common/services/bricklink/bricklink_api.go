@@ -15,8 +15,8 @@ const TokenSecret = "733B0F8729C64879BA4094CB2936FE05"
 const BricklinkApiBaseUrl = "https://api.bricklink.com/api/store/v1"
 
 type BLResponse struct {
-	Meta 		BLResponseMeta    `json:"meta"`
-	Data 		any 			   `json:"data"`
+	Meta        BLResponseMeta `json:"meta"`
+	Data        any            `json:"data"`
 	responseStr string
 }
 
@@ -46,13 +46,13 @@ func (client BLClient) BLGet(endpoint string) (*BLResponse, error) {
 }
 
 func parseBLResponse(jsonStr string) (*BLResponse, error) {
-    var response BLResponse
-    err := json.Unmarshal([]byte(jsonStr), &response)
-    if err != nil {
-        return nil, fmt.Errorf("error parsing JSON: %v", err)
-    }
+	var response BLResponse
+	err := json.Unmarshal([]byte(jsonStr), &response)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing JSON: %v", err)
+	}
 
 	response.responseStr = jsonStr
-	
-    return &response, nil
+
+	return &response, nil
 }

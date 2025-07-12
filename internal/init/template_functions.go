@@ -12,24 +12,26 @@ import (
 // This allows for easy extension of template functionality
 func GetCustomTemplateFunctions() template.FuncMap {
 	return template.FuncMap{
-		"minus": minus,
-		"plus":  plus,
-		"mul":   multiply,
-		"div":   divide,
-		"mod":   modulo,
-		"max":   max,
-		"min":   min,
-		"inc":   increment,
-		"dec":   decrement,
-		"eq":    equal,
-		"ne":    notEqual,
-		"lt":    lessThan,
-		"le":    lessThanOrEqual,
-		"gt":    greaterThan,
+		"minus":   minus,
+		"plus":    plus,
+		"mul":     multiply,
+		"div":     divide,
+		"mod":     modulo,
+		"max":     max,
+		"min":     min,
+		"inc":     increment,
+		"dec":     decrement,
+		"eq":      equal,
+		"ne":      notEqual,
+		"lt":      lessThan,
+		"le":      lessThanOrEqual,
+		"gt":      greaterThan,
 		"ge":      greaterThanOrEqual,
 		"len":     length,
 		"str":     toString,
 		"timeAgo": timeAgo,
+		"dict":    createDict,
+		"default": defaultValue,
 	}
 }
 
@@ -37,7 +39,7 @@ func GetCustomTemplateFunctions() template.FuncMap {
 func minus(a, b interface{}) (interface{}, error) {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
-	
+
 	switch av.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		switch bv.Kind() {
@@ -54,7 +56,7 @@ func minus(a, b interface{}) (interface{}, error) {
 			return av.Float() - bv.Float(), nil
 		}
 	}
-	
+
 	return nil, errors.New("minus: invalid operands")
 }
 
@@ -62,7 +64,7 @@ func minus(a, b interface{}) (interface{}, error) {
 func plus(a, b interface{}) (interface{}, error) {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
-	
+
 	switch av.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		switch bv.Kind() {
@@ -79,7 +81,7 @@ func plus(a, b interface{}) (interface{}, error) {
 			return av.Float() + bv.Float(), nil
 		}
 	}
-	
+
 	return nil, errors.New("plus: invalid operands")
 }
 
@@ -87,7 +89,7 @@ func plus(a, b interface{}) (interface{}, error) {
 func multiply(a, b interface{}) (interface{}, error) {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
-	
+
 	switch av.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		switch bv.Kind() {
@@ -104,7 +106,7 @@ func multiply(a, b interface{}) (interface{}, error) {
 			return av.Float() * bv.Float(), nil
 		}
 	}
-	
+
 	return nil, errors.New("mul: invalid operands")
 }
 
@@ -112,7 +114,7 @@ func multiply(a, b interface{}) (interface{}, error) {
 func divide(a, b interface{}) (interface{}, error) {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
-	
+
 	switch av.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		switch bv.Kind() {
@@ -141,7 +143,7 @@ func divide(a, b interface{}) (interface{}, error) {
 			return av.Float() / bv.Float(), nil
 		}
 	}
-	
+
 	return nil, errors.New("div: invalid operands")
 }
 
@@ -149,14 +151,14 @@ func divide(a, b interface{}) (interface{}, error) {
 func modulo(a, b interface{}) (interface{}, error) {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
-	
+
 	if av.Kind() == reflect.Int64 && bv.Kind() == reflect.Int64 {
 		if bv.Int() == 0 {
 			return nil, errors.New("mod: division by zero")
 		}
 		return av.Int() % bv.Int(), nil
 	}
-	
+
 	return nil, errors.New("mod: invalid operands")
 }
 
@@ -164,7 +166,7 @@ func modulo(a, b interface{}) (interface{}, error) {
 func max(a, b interface{}) interface{} {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
-	
+
 	switch av.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		switch bv.Kind() {
@@ -183,7 +185,7 @@ func max(a, b interface{}) interface{} {
 			return bv.Float()
 		}
 	}
-	
+
 	return a
 }
 
@@ -191,7 +193,7 @@ func max(a, b interface{}) interface{} {
 func min(a, b interface{}) interface{} {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
-	
+
 	switch av.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		switch bv.Kind() {
@@ -210,35 +212,35 @@ func min(a, b interface{}) interface{} {
 			return bv.Float()
 		}
 	}
-	
+
 	return a
 }
 
 // increment adds 1 to a number
 func increment(a interface{}) interface{} {
 	av := reflect.ValueOf(a)
-	
+
 	switch av.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return av.Int() + 1
 	case reflect.Float32, reflect.Float64:
 		return av.Float() + 1
 	}
-	
+
 	return a
 }
 
 // decrement subtracts 1 from a number
 func decrement(a interface{}) interface{} {
 	av := reflect.ValueOf(a)
-	
+
 	switch av.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return av.Int() - 1
 	case reflect.Float32, reflect.Float64:
 		return av.Float() - 1
 	}
-	
+
 	return a
 }
 
@@ -256,7 +258,7 @@ func notEqual(a, b interface{}) bool {
 func lessThan(a, b interface{}) bool {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
-	
+
 	switch av.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		switch bv.Kind() {
@@ -273,7 +275,7 @@ func lessThan(a, b interface{}) bool {
 			return av.Float() < bv.Float()
 		}
 	}
-	
+
 	return false
 }
 
@@ -297,13 +299,13 @@ func length(v interface{}) int {
 	if v == nil {
 		return 0
 	}
-	
+
 	rv := reflect.ValueOf(v)
 	switch rv.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Map, reflect.String:
 		return rv.Len()
 	}
-	
+
 	return 0
 }
 
@@ -312,7 +314,7 @@ func toString(v interface{}) string {
 	if v == nil {
 		return ""
 	}
-	
+
 	switch val := v.(type) {
 	case string:
 		return val
@@ -330,7 +332,7 @@ func toString(v interface{}) string {
 // timeAgo returns a human-readable time difference from now
 func timeAgo(t interface{}) string {
 	var timeVal time.Time
-	
+
 	switch v := t.(type) {
 	case time.Time:
 		timeVal = v
@@ -342,17 +344,17 @@ func timeAgo(t interface{}) string {
 	default:
 		return "unknown"
 	}
-	
+
 	now := time.Now()
 	duration := now.Sub(timeVal)
-	
+
 	// Handle future times
 	if duration < 0 {
 		duration = -duration
 		// Could add "in X time" format if needed
 		return "just now"
 	}
-	
+
 	seconds := int(duration.Seconds())
 	minutes := seconds / 60
 	hours := minutes / 60
@@ -360,7 +362,7 @@ func timeAgo(t interface{}) string {
 	weeks := days / 7
 	months := days / 30
 	years := days / 365
-	
+
 	switch {
 	case years > 0:
 		if years == 1 {
@@ -395,4 +397,55 @@ func timeAgo(t interface{}) string {
 	default:
 		return "just now"
 	}
+}
+
+// createDict creates a dictionary from alternating key-value pairs
+func createDict(values ...interface{}) (map[string]interface{}, error) {
+	if len(values)%2 != 0 {
+		return nil, errors.New("dict: odd number of arguments")
+	}
+
+	dict := make(map[string]interface{})
+	for i := 0; i < len(values); i += 2 {
+		key, ok := values[i].(string)
+		if !ok {
+			return nil, errors.New("dict: keys must be strings")
+		}
+		dict[key] = values[i+1]
+	}
+
+	return dict, nil
+}
+
+// defaultValue returns the first value if it's not nil/empty, otherwise returns the default
+func defaultValue(value, defaultVal interface{}) interface{} {
+	if value == nil {
+		return defaultVal
+	}
+
+	rv := reflect.ValueOf(value)
+	switch rv.Kind() {
+	case reflect.String:
+		if rv.String() == "" {
+			return defaultVal
+		}
+	case reflect.Slice, reflect.Array, reflect.Map:
+		if rv.Len() == 0 {
+			return defaultVal
+		}
+	case reflect.Bool:
+		if !rv.Bool() {
+			return defaultVal
+		}
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		if rv.Int() == 0 {
+			return defaultVal
+		}
+	case reflect.Float32, reflect.Float64:
+		if rv.Float() == 0 {
+			return defaultVal
+		}
+	}
+
+	return value
 }

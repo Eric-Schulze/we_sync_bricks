@@ -16,7 +16,7 @@ func NewOrdersClient(c Orders) (*OrdersService, error) {
 	}, nil
 }
 
-func (service *OrdersService) GetOrders() (string, error){
+func (service *OrdersService) GetOrders() (string, error) {
 	var orders, err = service.orders.GetOrders()
 	if err != nil {
 		return "", err
@@ -24,4 +24,3 @@ func (service *OrdersService) GetOrders() (string, error){
 
 	return orders, nil
 }
-

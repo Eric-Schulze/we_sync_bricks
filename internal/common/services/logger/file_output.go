@@ -50,23 +50,23 @@ func NewFileOutputWithConfig(config FileOutputConfig) (*FileOutput, error) {
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create log directory: %w", err)
 	}
-	
+
 	// Open or create the log file
 	file, err := os.OpenFile(config.FilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open log file: %w", err)
 	}
-	
+
 	output := &FileOutput{
 		file:     file,
 		filePath: config.FilePath,
 		format:   config.Format,
 	}
-	
+
 	if config.Format == FormatJSON {
 		output.encoder = json.NewEncoder(file)
 	}
-	
+
 	return output, nil
 }
 
@@ -74,7 +74,7 @@ func NewFileOutputWithConfig(config FileOutputConfig) (*FileOutput, error) {
 func (f *FileOutput) Write(entry LogEntry) error {
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
-	
+
 	switch f.format {
 	case FormatJSON:
 		return f.writeJSON(entry)
@@ -100,30 +100,30 @@ func (f *FileOutput) writeJSON(entry LogEntry) error {
 		Source:    entry.Source,
 		Fields:    entry.Fields,
 	}
-	
+
 	return f.encoder.Encode(jsonEntry)
 }
 
 // writeText writes the log entry as formatted text
 func (f *FileOutput) writeText(entry LogEntry) error {
 	timestamp := entry.Timestamp.Format("2006-01-02 15:04:05")
-	
+
 	logLine := fmt.Sprintf("[%s] %s %s", timestamp, entry.Level.String(), entry.Message)
-	
+
 	// Add fields if any
 	if len(entry.Fields) > 0 {
 		for key, value := range entry.Fields {
 			logLine += fmt.Sprintf(" %s=%v", key, value)
 		}
 	}
-	
+
 	logLine += "\n"
-	
+
 	_, err := f.file.WriteString(logLine)
 	if err != nil {
 		return err
 	}
-	
+
 	// Ensure data is written to disk
 	return f.file.Sync()
 }
@@ -132,7 +132,7 @@ func (f *FileOutput) writeText(entry LogEntry) error {
 func (f *FileOutput) Close() error {
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
-	
+
 	if f.file != nil {
 		err := f.file.Close()
 		f.file = nil
@@ -145,32 +145,32 @@ func (f *FileOutput) Close() error {
 func (f *FileOutput) RotateFile() error {
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
-	
+
 	// Close current file
 	if f.file != nil {
 		f.file.Close()
 	}
-	
+
 	// Rename current file with timestamp
 	timestamp := time.Now().Format("20060102_150405")
 	rotatedPath := fmt.Sprintf("%s.%s", f.filePath, timestamp)
-	
+
 	if err := os.Rename(f.filePath, rotatedPath); err != nil {
 		// If rename fails, just continue with new file
 		fmt.Fprintf(os.Stderr, "Failed to rotate log file: %v\n", err)
 	}
-	
+
 	// Create new file
 	file, err := os.OpenFile(f.filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to create new log file: %w", err)
 	}
-	
+
 	f.file = file
 	if f.format == FormatJSON {
 		f.encoder = json.NewEncoder(file)
 	}
-	
+
 	return nil
 }
 
@@ -178,15 +178,15 @@ func (f *FileOutput) RotateFile() error {
 func (f *FileOutput) GetFileSize() (int64, error) {
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
-	
+
 	if f.file == nil {
 		return 0, fmt.Errorf("file is not open")
 	}
-	
+
 	stat, err := f.file.Stat()
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return stat.Size(), nil
 }

@@ -1,0 +1,16 @@
+{{define "parts-list-container"}}
+<div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
+    <button type="button" 
+            id="toggle-parts-{{.ItemNo}}"
+            onclick="togglePartsList('{{.ItemNo}}')"
+            style="background: none; border: none; color: #6b7280; font-size: 0.875rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; width: 100%;"
+            disabled>
+        <span id="toggle-icon-{{.ItemNo}}">▶</span>
+        <span>Show Parts List</span>
+        <span style="font-size: 0.75rem; color: #9ca3af;">(Loading...)</span>
+    </button>
+    <div id="parts-list-{{.ItemNo}}" style="display: none; max-height: 200px; overflow-y: auto; background-color: #f8f9fa; padding: 0.75rem; border-radius: 6px; font-size: 0.875rem; overflow-x: hidden;">
+        <!-- Parts will be loaded here -->
+    </div>
+</div>
+{{end}}

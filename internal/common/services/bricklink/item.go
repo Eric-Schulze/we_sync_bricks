@@ -6,9 +6,9 @@ import (
 
 type Item struct {
 	gorm.Model
-	No         string `gorm:"index;not null" json:"no"`         // BrickLink item number (e.g., "3001")
+	No         string `gorm:"index;not null" json:"no"` // BrickLink item number (e.g., "3001")
 	Name       string `json:"name"`
-	Type       string `json:"type"`                             // PART, SET, MINIFIG, BOOK, etc.
+	Type       string `json:"type"` // PART, SET, MINIFIG, BOOK, etc.
 	CategoryID int    `json:"category_id"`
 }
 

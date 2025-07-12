@@ -19,7 +19,7 @@ var createDatabaseMigrationName = "0001_InitialMigration.sql"
 type migration struct {
 	file_name  string
 	version    string
-	name 	   string
+	name       string
 	created_at string
 }
 
@@ -34,9 +34,9 @@ func loadDBConfigForMigration() (models.DBConfig, error) {
 	viper.AddConfigPath("./internal/init")
 
 	viper.AutomaticEnv()
-	
+
 	// Find and read the config file
-	if err := viper.ReadInConfig(); err != nil { 
+	if err := viper.ReadInConfig(); err != nil {
 		// Handle errors reading the config file
 		logger.Error("Fatal error config file", "error", err)
 		return models.DBConfig{}, err
@@ -68,7 +68,7 @@ func RunMigrate(args []string) {
 		logger.Error("Error creating database client", "error", err)
 		return
 	}
-	
+
 	migrateDB(*db)
 }
 
@@ -83,10 +83,10 @@ func migrateDB(db PGDBService) {
 		logger.Error("Error running finding migration files", "error", err)
 		return
 	}
-	
+
 	// Sort files alphabetically
 	sort.Strings(files)
-	
+
 	// Check if this is a blank database (no migrations table)
 	if !migrationsTableExists(db) {
 		logger.Info("Database is blank - running all migrations from the beginning")
@@ -97,11 +97,11 @@ func migrateDB(db PGDBService) {
 		for _, migration := range getMigrations(db) {
 			migrations = append(migrations, migration.file_name)
 		}
-		
+
 		if len(migrations) > 0 {
 			// Sort migrations alphabetically
 			sort.Strings(migrations)
-			
+
 			// Find the index of the last migration and start from the next one
 			lastMigration := migrations[len(migrations)-1]
 			startIndex := slices.Index(files, lastMigration)
@@ -116,7 +116,7 @@ func migrateDB(db PGDBService) {
 
 	for _, file := range files {
 		filename := filepath.Base(file)
-		
+
 		logger.Info("Running migration", "file", filename)
 
 		args := []string{"-d", db.Config.DSN, "-f", file}
@@ -137,7 +137,7 @@ func migrateDB(db PGDBService) {
 			logger.Error("All further migrations cancelled")
 			break
 		}
-			
+
 		completed = append(completed, filename)
 		logger.Info("Completed migration", "migration_file", filename, "result", string(result))
 	}
@@ -157,7 +157,7 @@ func migrationsTableExists(db models.DBService) bool {
 		WHERE table_schema = 'public' 
 		AND table_name = 'migrations'
 	);`
-	
+
 	// Use the Query method and manually handle the single row result
 	rows, err := db.Query(sql)
 	if err != nil {
@@ -177,7 +177,7 @@ func migrationsTableExists(db models.DBService) bool {
 		logger.Error("Error scanning migrations table existence result", "error", err)
 		return false
 	}
-	
+
 	return exists
 }
 
@@ -198,7 +198,7 @@ func getMigrations(db models.DBService) []migration {
 func updateMigrations(db models.DBService, migration_files []string) {
 	for _, f := range migration_files {
 		migration := strings.Split(f, "_")
-		sql := 
+		sql :=
 			`INSERT INTO migrations(file_name, version, name) 
 			 VALUES($1, $2, $3);`
 		result, err := db.ExecSQL(sql, f, migration[0], migration[1])

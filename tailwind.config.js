@@ -2,7 +2,9 @@
 module.exports = {
   content: [
     "./web/templates/**/*.html",
-    "./web/static/js/**/*.js"
+    "./web/static/js/**/*.js",
+    "./partial_minifigs/**/*.go",
+    "./internal/**/*.go"
   ],
   theme: {
     extend: {

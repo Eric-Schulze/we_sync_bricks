@@ -1,0 +1,19 @@
+{{define "base-modal"}}
+<div class="modal-overlay" hx-on:click="if(event.target === this) this.remove()">
+    <div class="modal" style="max-width: {{.MaxWidth | default "600px"}}; width: 90vw;">
+        <h2>{{.Title}}</h2>
+        
+        {{.Content}}
+
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+            {{if .ShowCloseButton | default true}}
+            <button type="button" class="btn btn-secondary" 
+                    onclick="document.getElementById('modal-container').innerHTML = ''">
+                {{.CloseButtonText | default "Close"}}
+            </button>
+            {{end}}
+            {{.AdditionalButtons}}
+        </div>
+    </div>
+</div>
+{{end}}

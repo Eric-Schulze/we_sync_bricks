@@ -27,7 +27,7 @@ func NewStructuredOutput(writer io.Writer) *StructuredOutput {
 func (s *StructuredOutput) Write(entry LogEntry) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	
+
 	// Create a structured log entry
 	structuredEntry := struct {
 		Timestamp string                 `json:"@timestamp"`
@@ -46,7 +46,7 @@ func (s *StructuredOutput) Write(entry LogEntry) error {
 		Version:   "1.0",
 		Service:   "we_sync_bricks",
 	}
-	
+
 	return s.encoder.Encode(structuredEntry)
 }
 
@@ -75,10 +75,10 @@ func NewBufferedOutput(output LogOutput, bufferSize int, flushInterval time.Dura
 		buffer:     make([]LogEntry, 0, bufferSize),
 		bufferSize: bufferSize,
 	}
-	
+
 	// Set up periodic flush
 	bo.flushTimer = time.AfterFunc(flushInterval, bo.periodicFlush)
-	
+
 	return bo
 }
 
@@ -86,14 +86,14 @@ func NewBufferedOutput(output LogOutput, bufferSize int, flushInterval time.Dura
 func (b *BufferedOutput) Write(entry LogEntry) error {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
-	
+
 	b.buffer = append(b.buffer, entry)
-	
+
 	// Flush if buffer is full
 	if len(b.buffer) >= b.bufferSize {
 		return b.flushLocked()
 	}
-	
+
 	return nil
 }
 
@@ -101,7 +101,7 @@ func (b *BufferedOutput) Write(entry LogEntry) error {
 func (b *BufferedOutput) Flush() error {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
-	
+
 	return b.flushLocked()
 }
 
@@ -110,17 +110,17 @@ func (b *BufferedOutput) flushLocked() error {
 	if len(b.buffer) == 0 {
 		return nil
 	}
-	
+
 	var lastErr error
 	for _, entry := range b.buffer {
 		if err := b.output.Write(entry); err != nil {
 			lastErr = err
 		}
 	}
-	
+
 	// Clear the buffer
 	b.buffer = b.buffer[:0]
-	
+
 	return lastErr
 }
 
@@ -137,12 +137,12 @@ func (b *BufferedOutput) Close() error {
 	if b.flushTimer != nil {
 		b.flushTimer.Stop()
 	}
-	
+
 	// Flush any remaining entries
 	if err := b.Flush(); err != nil {
 		fmt.Printf("Error flushing buffer on close: %v\n", err)
 	}
-	
+
 	// Close the underlying output
 	return b.output.Close()
 }
@@ -164,7 +164,7 @@ func NewMultiOutput(outputs ...LogOutput) *MultiOutput {
 func (m *MultiOutput) AddOutput(output LogOutput) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	
+
 	m.outputs = append(m.outputs, output)
 }
 
@@ -172,7 +172,7 @@ func (m *MultiOutput) AddOutput(output LogOutput) {
 func (m *MultiOutput) Write(entry LogEntry) error {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
-	
+
 	var lastErr error
 	for _, output := range m.outputs {
 		if err := output.Write(entry); err != nil {
@@ -180,7 +180,7 @@ func (m *MultiOutput) Write(entry LogEntry) error {
 			// Continue writing to other outputs even if one fails
 		}
 	}
-	
+
 	return lastErr
 }
 
@@ -188,13 +188,13 @@ func (m *MultiOutput) Write(entry LogEntry) error {
 func (m *MultiOutput) Close() error {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	
+
 	var lastErr error
 	for _, output := range m.outputs {
 		if err := output.Close(); err != nil {
 			lastErr = err
 		}
 	}
-	
+
 	return lastErr
 }

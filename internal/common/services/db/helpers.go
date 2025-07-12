@@ -34,7 +34,7 @@ func CollectRowsToStructFromService[T any](dbService models.DBService, query str
 // QueryRowToStructFromService is a helper function for single row queries that works with the DBService interface
 func QueryRowToStructFromService[T any](dbService models.DBService, query string, args ...any) (T, error) {
 	var result T
-	
+
 	// Check if we can cast to our concrete implementation to use the optimized method
 	if pgdbService, ok := dbService.(*PGDBService); ok {
 		return QueryRowToStruct[T](*pgdbService, query, args...)
@@ -53,12 +53,19 @@ func QueryRowToStructFromService[T any](dbService models.DBService, query string
 		return result, pgx.ErrNoRows
 	}
 
-	// Use pgx.RowToStructByName to scan into the struct
-	result, err = pgx.RowToStructByName[T](rows)
+	// Use pgx.CollectRows with RowToStructByName to scan into the struct
+	results, err := pgx.CollectRows(rows, pgx.RowToStructByName[T])
 	if err != nil {
 		logger.Error("Error scanning row to struct", "query", query, "error", err)
 		return result, err
 	}
+
+	if len(results) == 0 {
+		logger.Error("No rows found", "query", query)
+		return result, pgx.ErrNoRows
+	}
+
+	result = results[0]
 
 	return result, nil
 }

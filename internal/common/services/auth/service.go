@@ -5,10 +5,10 @@ import (
 	"html/template"
 	"time"
 
+	"github.com/eric-schulze/we_sync_bricks/internal/common/models"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/wagslane/go-password-validator"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/eric-schulze/we_sync_bricks/internal/common/models"
 )
 
 // AuthRepositoryInterface defines the interface for auth repository operations
@@ -142,7 +142,7 @@ func (s *AuthService) validatePassword(password string) error {
 	// Minimum entropy of 60 bits (good security balance)
 	// This typically requires 8+ characters with mixed case, numbers, symbols
 	const minEntropyBits = 60
-	
+
 	return passwordvalidator.Validate(password, minEntropyBits)
 }
 

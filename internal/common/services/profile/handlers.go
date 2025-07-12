@@ -185,7 +185,7 @@ func (h *ProfileHandler) HandleChangePassword() http.HandlerFunc {
 		err := h.service.ChangePassword(user.ID, req)
 		if err != nil {
 			logger.Error("Password change failed", "user_id", user.ID, "error", err)
-			
+
 			// Return error response for HTMX
 			if r.Header.Get("HX-Request") == "true" {
 				w.Header().Set("Content-Type", "text/html")
@@ -193,7 +193,7 @@ func (h *ProfileHandler) HandleChangePassword() http.HandlerFunc {
 				w.Write([]byte(`<div class="error-message" style="color: red; padding: 10px; border: 1px solid red; border-radius: 4px; margin: 10px 0;">Error: ` + err.Error() + `</div>`))
 				return
 			}
-			
+
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -229,17 +229,17 @@ func (h *ProfileHandler) HandleUpdateAPIKeys() http.HandlerFunc {
 
 		provider := r.Form.Get("provider")
 		req := &APIKeyUpdateRequest{
-			Provider:        provider,
-			ConsumerKey:     r.Form.Get("consumer_key"),
-			ConsumerSecret:  r.Form.Get("consumer_secret"),
-			Token:           r.Form.Get("token"),
-			TokenSecret:     r.Form.Get("token_secret"),
+			Provider:       provider,
+			ConsumerKey:    r.Form.Get("consumer_key"),
+			ConsumerSecret: r.Form.Get("consumer_secret"),
+			Token:          r.Form.Get("token"),
+			TokenSecret:    r.Form.Get("token_secret"),
 		}
 
 		err := h.service.UpdateAPICredentials(user.ID, req)
 		if err != nil {
 			logger.Error("API key update failed", "user_id", user.ID, "provider", provider, "error", err)
-			
+
 			// Return error response for HTMX
 			if r.Header.Get("HX-Request") == "true" {
 				w.Header().Set("Content-Type", "text/html")
@@ -247,7 +247,7 @@ func (h *ProfileHandler) HandleUpdateAPIKeys() http.HandlerFunc {
 				w.Write([]byte(`<div class="error-message" style="color: red; padding: 10px; border: 1px solid red; border-radius: 4px; margin: 10px 0;">Error: ` + err.Error() + `</div>`))
 				return
 			}
-			
+
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -282,11 +282,11 @@ func (h *ProfileHandler) HandleDeleteAPIKeys() http.HandlerFunc {
 		}
 
 		provider := r.Form.Get("provider")
-		
+
 		err := h.service.DeleteAPICredentials(user.ID, provider)
 		if err != nil {
 			logger.Error("API key deletion failed", "user_id", user.ID, "provider", provider, "error", err)
-			
+
 			// Return error response for HTMX
 			if r.Header.Get("HX-Request") == "true" {
 				w.Header().Set("Content-Type", "text/html")
@@ -294,7 +294,7 @@ func (h *ProfileHandler) HandleDeleteAPIKeys() http.HandlerFunc {
 				w.Write([]byte(`<div class="error-message" style="color: red; padding: 10px; border: 1px solid red; border-radius: 4px; margin: 10px 0;">Error: ` + err.Error() + `</div>`))
 				return
 			}
-			
+
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}

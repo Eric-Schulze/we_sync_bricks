@@ -16,7 +16,7 @@ func NewInventoryService(c InventoryClient) *InventoryService {
 	}
 }
 
-func (service *InventoryService) GetInventory() (string, error){
+func (service *InventoryService) GetInventory() (string, error) {
 	var inventory, err = service.client.GetInventory()
 	if err != nil {
 		return "", err

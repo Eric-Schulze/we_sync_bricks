@@ -12,8 +12,8 @@ import (
 
 type PGDBService struct {
 	pgxClient *pgxpool.Pool
-	context context.Context
-	Config models.DBConfig
+	context   context.Context
+	Config    models.DBConfig
 }
 
 func NewPostgresDbClient(dbConfig *models.DBConfig, context *context.Context) (*PGDBService, error) {
@@ -24,32 +24,32 @@ func NewPostgresDbClient(dbConfig *models.DBConfig, context *context.Context) (*
 
 	return &PGDBService{
 		pgxClient: db,
-		context: *context,
-		Config: *dbConfig,
+		context:   *context,
+		Config:    *dbConfig,
 	}, nil
 }
 
 // StartConnectionPool creates a new pool of connections to the Postgres db
 // with the defined number of connections and settings
-// TODO Refactor to wrap the pgxpool.Conn in custom type so that 
+// TODO Refactor to wrap the pgxpool.Conn in custom type so that
 // db_service.go does not have to depend on pgxpool
 func (client PGDBService) StartConnectionPool() (*pgxpool.Conn, error) {
 	connection, err := client.pgxClient.Acquire(context.Background())
-	if err!=nil {
-	 log.Fatal("Error while acquiring connection from the database pool!!")
-	} 
+	if err != nil {
+		log.Fatal("Error while acquiring connection from the database pool!!")
+	}
 	defer connection.Release()
-   
+
 	err = connection.Ping(context.Background())
-	if err!=nil{
-	 log.Fatal("Could not ping database")
+	if err != nil {
+		log.Fatal("Could not ping database")
 
 	}
 
 	return connection, nil
 }
 
-// TODO Refactor to wrap the pgx.Rows in custom type so that 
+// TODO Refactor to wrap the pgx.Rows in custom type so that
 // db_service.go does not have to depend on pgx
 func (client PGDBService) Query(query string, args ...any) (pgx.Rows, error) {
 	rows, err := client.pgxClient.Query(client.context, query, args...)
@@ -62,7 +62,7 @@ func (client PGDBService) Query(query string, args ...any) (pgx.Rows, error) {
 	return rows, nil
 }
 
-// TODO Refactor to wrap the pgx.Rows in custom type so that 
+// TODO Refactor to wrap the pgx.Rows in custom type so that
 // db_service.go does not have to depend on pgx
 func (client PGDBService) ExecSQL(query string, args ...any) (string, error) {
 	status, err := client.pgxClient.Exec(client.context, query, args...)

@@ -11,7 +11,7 @@ type DBConfig struct {
 	UserName          string `mapstructure:"username"`
 	Password          string `mapstructure:"password"`
 	DBName            string `mapstructure:"dbname"`
-	DSN			  	  string
+	DSN               string
 	MaxConns          int32
 	MinConns          int32
 	MaxConnLifeTime   time.Duration

@@ -1,0 +1,20 @@
+{{define "bricklink-search-form"}}
+<div class="form-group" style="margin-bottom: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px;">
+    <h3 style="margin-bottom: 1rem; color: #374151;">Search Bricklink</h3>
+    <div style="display: flex; gap: 0.5rem;">
+        <input type="text" 
+               id="bricklink-search" 
+               placeholder="Enter Bricklink Minifig ID (e.g., sw0001a)" 
+               style="flex: 1; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 4px;">
+        <button type="button" 
+                class="btn btn-secondary"
+                hx-post="/partial-minifigs-lists/search-bricklink"
+                hx-vals='js:{"bricklink_id": document.getElementById("bricklink-search").value}'
+                hx-target="#search-results"
+                hx-swap="innerHTML">
+            Search
+        </button>
+    </div>
+    <div id="search-results" style="margin-top: 1rem; min-height: 2rem;" class="flex-auto" data-list-id="{{.ListID}}"></div>
+</div>
+{{end}}

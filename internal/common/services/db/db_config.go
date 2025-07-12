@@ -22,7 +22,7 @@ func WithPgxConfig(dbConfig *models.DBConfig) *pgx.ConnConfig {
 	const defaultMaxConnLifetime = time.Hour
 	const defaultMaxConnIdleTime = time.Minute * 30
 	const defaultHealthCheckPeriod = time.Minute
-	
+
 	// Create the dsn string
 	dbConfig.DSN = strings.TrimSpace(fmt.Sprintf(
 		"user=%s password=%s dbname=%s host=%s port=%d",
@@ -30,17 +30,17 @@ func WithPgxConfig(dbConfig *models.DBConfig) *pgx.ConnConfig {
 		dbConfig.Host, dbConfig.Port))
 
 	pgxConfig, err := pgx.ParseConfig(dbConfig.DSN)
-	if err!=nil {
-	 	logger.Error("Failed to create a config", "error", err)
+	if err != nil {
+		logger.Error("Failed to create a config", "error", err)
 		return nil
 	}
-   
+
 	dbConfig.MaxConns = defaultMaxConns
 	dbConfig.MinConns = defaultMinConns
 	dbConfig.MaxConnLifeTime = defaultMaxConnLifetime
 	dbConfig.MaxConnIdleTime = defaultMaxConnIdleTime
 	dbConfig.HealthCheckPeriod = defaultHealthCheckPeriod
-   
+
 	return pgxConfig
 }
 
@@ -59,17 +59,17 @@ func NewPg(ctx context.Context, dbConfig *models.DBConfig, pgxConfig *pgx.ConnCo
 	config.MaxConnLifetime = dbConfig.MaxConnLifeTime
 	config.MaxConnIdleTime = dbConfig.MaxConnIdleTime
 	config.HealthCheckPeriod = dbConfig.HealthCheckPeriod
-   
+
 	config.BeforeAcquire = func(ctx context.Context, c *pgx.Conn) bool {
-	 	logger.Info("Before acquiring the connection pool to the database!!")
+		logger.Info("Before acquiring the connection pool to the database!!")
 		return true
 	}
-   
+
 	config.AfterRelease = func(c *pgx.Conn) bool {
-	 	logger.Info("After releasing the connection pool to the database!!")
-	 	return true
+		logger.Info("After releasing the connection pool to the database!!")
+		return true
 	}
-   
+
 	config.BeforeClose = func(c *pgx.Conn) {
 		logger.Info("Closed the connection pool to the database!!")
 	}

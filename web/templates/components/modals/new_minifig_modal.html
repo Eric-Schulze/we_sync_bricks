@@ -1,0 +1,16 @@
+{{define "new-minifig-modal"}}
+<div class="modal-overlay" hx-on:click="if(event.target === this) this.remove()">
+    <div class="modal" style="max-width: 800px; width: 90vw;">
+        <h2>Add New Minifigure</h2>
+        
+        {{template "bricklink-search-form" .}}
+
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" 
+                    onclick="document.getElementById('modal-container').innerHTML = ''">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{{end}}

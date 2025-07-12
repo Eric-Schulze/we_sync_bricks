@@ -26,9 +26,9 @@ func LoadDBConfig() (models.DBConfig, error) {
 	viper.AddConfigPath("./internal/init")
 
 	viper.AutomaticEnv()
-	
+
 	// Find and read the config file
-	if err := viper.ReadInConfig(); err != nil { 
+	if err := viper.ReadInConfig(); err != nil {
 		// Handle errors reading the config file
 		logger.Error("Fatal error config file", "error", err)
 		return models.DBConfig{}, err
@@ -41,5 +41,3 @@ func LoadDBConfig() (models.DBConfig, error) {
 
 	return dbConfig, nil
 }
-
-

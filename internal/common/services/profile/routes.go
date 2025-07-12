@@ -11,15 +11,15 @@ func (handler *ProfileHandler) RegisterRoutes(router chi.Router) {
 	router.Route("/profile", func(r chi.Router) {
 		// Add auth middleware to protect all profile routes
 		r.Use(auth.Middleware(handler.jwtSecret))
-		
+
 		r.Get("/", handler.HandleProfilePage())
 		r.Get("/edit", handler.HandleEditProfilePage())
 		r.Post("/edit", handler.HandleUpdateProfile())
 		r.Put("/", handler.HandleUpdateProfile()) // Alternative for REST compliance
-		
+
 		// Password management
 		r.Post("/change-password", handler.HandleChangePassword())
-		
+
 		// API key management
 		r.Post("/api-keys", handler.HandleUpdateAPIKeys())
 		r.Delete("/api-keys", handler.HandleDeleteAPIKeys())

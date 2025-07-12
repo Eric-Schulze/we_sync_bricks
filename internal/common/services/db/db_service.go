@@ -11,6 +11,6 @@ func NewDBService(dbConfig *models.DBConfig, context *context.Context) (models.D
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return dbService, nil
 }

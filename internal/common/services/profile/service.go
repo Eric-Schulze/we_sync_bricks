@@ -38,7 +38,7 @@ func (s *ProfileService) GetProfile(userID int64) (*models.User, error) {
 // UpdateProfile updates a user's profile
 func (s *ProfileService) UpdateProfile(userID int64, req *ProfileUpdateRequest) (*models.User, error) {
 	logger.Debug("Service: Updating user profile", "user_id", userID, "username", req.Username)
-	
+
 	if userID <= 0 {
 		return nil, errors.New("invalid user ID")
 	}
@@ -65,7 +65,7 @@ func (s *ProfileService) UpdateProfile(userID int64, req *ProfileUpdateRequest) 
 // ChangePassword changes a user's password
 func (s *ProfileService) ChangePassword(userID int64, req *PasswordChangeRequest) error {
 	logger.Debug("Service: Changing password", "user_id", userID)
-	
+
 	if userID <= 0 {
 		return errors.New("invalid user ID")
 	}
@@ -96,7 +96,7 @@ func (s *ProfileService) ChangePassword(userID int64, req *PasswordChangeRequest
 // GetProfileWithCredentials retrieves a user's complete profile including OAuth credentials
 func (s *ProfileService) GetProfileWithCredentials(userID int64) (*ProfileData, error) {
 	logger.Debug("Service: Getting profile with credentials", "user_id", userID)
-	
+
 	if userID <= 0 {
 		return nil, errors.New("invalid user ID")
 	}
@@ -115,7 +115,7 @@ func (s *ProfileService) GetProfileWithCredentials(userID int64) (*ProfileData, 
 		Email:     user.Email,
 		CreatedAt: user.CreatedAt.Format("2006-01-02 15:04:05"),
 	}
-	
+
 	if user.FirstName != nil {
 		profileUser.FirstName = *user.FirstName
 	}
@@ -131,7 +131,7 @@ func (s *ProfileService) GetProfileWithCredentials(userID int64) (*ProfileData, 
 	brickowlCreds, _ := s.repo.GetUserOAuthCredentials(userID, "brickowl")
 
 	profileData := &ProfileData{
-		User:               profileUser,
+		User:                 profileUser,
 		BricklinkCredentials: bricklinkCreds,
 		BrickowlCredentials:  brickowlCreds,
 	}
@@ -143,7 +143,7 @@ func (s *ProfileService) GetProfileWithCredentials(userID int64) (*ProfileData, 
 // UpdateAPICredentials saves or updates OAuth credentials for a provider
 func (s *ProfileService) UpdateAPICredentials(userID int64, req *APIKeyUpdateRequest) error {
 	logger.Debug("Service: Updating API credentials", "user_id", userID, "provider", req.Provider)
-	
+
 	if userID <= 0 {
 		return errors.New("invalid user ID")
 	}
@@ -171,7 +171,7 @@ func (s *ProfileService) UpdateAPICredentials(userID int64, req *APIKeyUpdateReq
 // DeleteAPICredentials removes OAuth credentials for a provider
 func (s *ProfileService) DeleteAPICredentials(userID int64, provider string) error {
 	logger.Debug("Service: Deleting API credentials", "user_id", userID, "provider", provider)
-	
+
 	if userID <= 0 {
 		return errors.New("invalid user ID")
 	}

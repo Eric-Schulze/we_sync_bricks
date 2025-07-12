@@ -1,10 +1,10 @@
 package main
 
 import (
-    start "github.com/eric-schulze/we_sync_bricks/internal/init"
-    "context"
-    "fmt"
-    "os"
+	"context"
+	"fmt"
+	start "github.com/eric-schulze/we_sync_bricks/internal/init"
+	"os"
 )
 
 func main() {
