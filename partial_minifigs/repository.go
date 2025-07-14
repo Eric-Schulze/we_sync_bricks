@@ -2,6 +2,7 @@ package partial_minifigs
 
 import (
 	"errors"
+	"time"
 
 	"github.com/eric-schulze/we_sync_bricks/internal/common/models"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/db"
@@ -21,13 +22,50 @@ func NewPartialMinifigRepository(dbService models.DBService) *PartialMinifigRepo
 
 // GetAllPartialMinifigLists retrieves all partial minifig lists for a specific user from the database
 func (repo *PartialMinifigRepository) GetAllPartialMinifigLists(userID int64) ([]PartialMinifigList, error) {
-	sql := "SELECT id, name, description, user_id, created_at, updated_at FROM partial_minifig_lists WHERE user_id = $1 ORDER BY created_at DESC;"
+	sql := `SELECT 
+		pml.id, 
+		pml.name, 
+		pml.description, 
+		pml.user_id, 
+		pml.created_at, 
+		pml.updated_at,
+		COALESCE(COUNT(pm.id), 0) as minifig_count
+	FROM partial_minifig_lists pml
+	LEFT JOIN partial_minifigs pm ON pml.id = pm.partial_minifig_list_id
+	WHERE pml.user_id = $1 
+	GROUP BY pml.id, pml.name, pml.description, pml.user_id, pml.created_at, pml.updated_at
+	ORDER BY pml.created_at DESC;`
 
-	// Use the helper function that works with the DBService interface
-	lists, err := db.CollectRowsToStructFromService[PartialMinifigList](repo.db, sql, userID)
+	// Use CollectRowsToMap since we need to handle the count separately
+	rows, err := repo.db.CollectRowsToMap(sql, userID)
 	if err != nil {
-		logger.Error("Database Error while retrieving partial minifig lists", "user_id", userID, "error", err)
+		logger.Error("Database Error while retrieving partial minifig lists with counts", "user_id", userID, "error", err)
 		return nil, err
+	}
+
+	var lists []PartialMinifigList
+	for _, row := range rows {
+		list := PartialMinifigList{
+			ID:                  row["id"].(int64),
+			Name:                row["name"].(string),
+			UserID:              row["user_id"].(int64),
+			CreatedAt:           row["created_at"].(time.Time),
+			PartialMinifigCount: row["minifig_count"].(int64),
+		}
+
+		if desc := row["description"]; desc != nil {
+			if descStr, ok := desc.(string); ok {
+				list.Description = &descStr
+			}
+		}
+
+		if updated := row["updated_at"]; updated != nil {
+			if updatedTime, ok := updated.(time.Time); ok {
+				list.UpdatedAt = &updatedTime
+			}
+		}
+
+		lists = append(lists, list)
 	}
 
 	return lists, nil

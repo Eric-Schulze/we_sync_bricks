@@ -1,14 +1,37 @@
 {{define "minifig-info"}}
-<div style="flex: 1;">
-    <!-- Name and ID (Full Width) -->
-    <div style="margin-bottom: 1rem;">
-        <h4 style="margin: 0 0 0.5rem 0; color: #374151; font-weight: 600; font-size: 1.25rem; line-height: 1.3;">{{.Name}}</h4>
-        <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">
-            <strong>Item ID:</strong> {{.ItemNo}}
-        </p>
+<div class="flex-1 min-w-0">
+    <div class="flex items-stretch gap-3 h-20">
+        <!-- Name and ID: Flexible -->
+        <div class="flex-1 min-w-0 flex flex-col justify-center h-full">
+            <h3 class="font-semibold text-lg text-gray-800 truncate leading-tight w-full">{{.Name}}</h3>
+            <p class="text-sm text-gray-600 truncate w-full">BrickLink ID: {{.ItemNo}}</p>
+        </div>
+
+        <!-- Right side containers: Fixed widths -->
+        <div class="flex items-stretch gap-3 flex-none">
+            <!-- 6-Month Average -->
+            <div class="w-32 min-w-0">
+                {{template "price-average" (dict "ItemNo" .ItemNo)}}
+            </div>
+            
+            <!-- Part-Out Value -->
+            <div class="w-32 min-w-0">
+                {{template "price-partout" (dict "ItemNo" .ItemNo)}}
+            </div>
+            
+            <!-- Piece Information -->
+            <div class="w-32 min-w-0">
+                {{template "price-piece-info" (dict "ItemNo" .ItemNo)}}
+            </div>
+            
+            <!-- Add Button -->
+            <div class="w-12 min-w-0">
+                {{template "add-minifig-button" (dict "ItemNo" .ItemNo)}}
+            </div>
+        </div>
     </div>
     
-    <!-- 6-Month Average Costs (Horizontal Layout) -->
-    {{template "price-display" .}}
+    <!-- Error Message -->
+    <div id="error-message-{{.ItemNo}}" class="mt-2 text-red-500 text-sm" style="display: none;"></div>
 </div>
 {{end}}

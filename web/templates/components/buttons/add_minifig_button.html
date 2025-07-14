@@ -1,0 +1,8 @@
+{{define "add-minifig-button"}}
+<button id="add-minifig-{{.ItemNo}}" 
+        onclick="addMinifigWithStoredParts('{{.ItemNo}}')"
+        disabled 
+        class="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-2 py-3 rounded-lg text-xs font-bold transition-colors disabled:cursor-not-allowed w-full h-full flex items-center justify-center shadow-sm">
+    ...
+</button>
+{{end}}

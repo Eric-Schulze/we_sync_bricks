@@ -1,18 +1,34 @@
 {{define "price-display"}}
-<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; max-width: 600px;">
-    <div style="padding: 0.6rem 0.75rem; background-color: #f0f9ff; border-radius: 6px; border-left: 4px solid #0ea5e9; text-align: center;">
-        <div style="font-size: 0.7rem; color: #0369a1; font-weight: 600; text-transform: uppercase; margin-bottom: 0.25rem;">6-Month Avg (New)</div>
-        <div id="price-new-{{.ItemNo}}" style="font-size: 1.1rem; font-weight: 700; color: #0369a1;">Loading...</div>
-    </div>
-    <div style="padding: 0.6rem 0.75rem; background-color: #f0fdf4; border-radius: 6px; border-left: 4px solid #22c55e; text-align: center;">
-        <div style="font-size: 0.7rem; color: #166534; font-weight: 600; text-transform: uppercase; margin-bottom: 0.25rem;">6-Month Avg (Used)</div>
-        <div id="price-used-{{.ItemNo}}" style="font-size: 1.1rem; font-weight: 700; color: #166534;">Loading...</div>
-    </div>
-    <div style="padding: 0.6rem 0.75rem; background-color: #f3f0ff; border-radius: 6px; border-left: 4px solid #a855f7; text-align: center;">
-        <div style="font-size: 0.7rem; color: #7c3aed; font-weight: 600; text-transform: uppercase; margin-bottom: 0.25rem;">Part Out Values</div>
-        <div style="font-size: 0.8rem; color: #7c3aed; margin-bottom: 0.1rem;">
-            <div>New: <span id="partout-new-{{.ItemNo}}" style="font-weight: 700;">Loading...</span></div>
-            <div>Used: <span id="partout-used-{{.ItemNo}}" style="font-weight: 700;">Loading...</span></div>
+<div class="mt-2 text-sm">
+    <div class="grid grid-cols-2 gap-3 text-center">
+        <!-- 6-Month Averages -->
+        <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 p-3 rounded-lg shadow-sm">
+            <div class="text-xs text-gray-700 font-medium mb-2">6-Month Average</div>
+            <div class="space-y-1">
+                <div class="flex items-center justify-center gap-2 text-xs">
+                    <span class="text-gray-600">New:</span>
+                    <span id="price-new-{{.ItemNo}}" class="font-bold text-green-700 bg-green-100 px-2 py-1 rounded">Loading...</span>
+                </div>
+                <div class="flex items-center justify-center gap-2 text-xs">
+                    <span class="text-gray-600">Used:</span>
+                    <span id="price-used-{{.ItemNo}}" class="font-bold text-blue-700 bg-blue-100 px-2 py-1 rounded">Loading...</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Part-Out Values -->
+        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 p-3 rounded-lg shadow-sm">
+            <div class="text-xs text-gray-700 font-medium mb-2">Part-Out Value</div>
+            <div class="space-y-1">
+                <div class="flex items-center justify-center gap-2 text-xs">
+                    <span class="text-gray-600">New:</span>
+                    <span id="partout-new-{{.ItemNo}}" class="font-bold text-green-700 bg-green-100 px-2 py-1 rounded">Calc...</span>
+                </div>
+                <div class="flex items-center justify-center gap-2 text-xs">
+                    <span class="text-gray-600">Used:</span>
+                    <span id="partout-used-{{.ItemNo}}" class="font-bold text-blue-700 bg-blue-100 px-2 py-1 rounded">Calc...</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>

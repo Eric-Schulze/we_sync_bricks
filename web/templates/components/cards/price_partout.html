@@ -1,0 +1,15 @@
+{{define "price-partout"}}
+<div class="bg-part-out-value-50 border border-part-out-value-500 p-3 rounded-lg shadow-sm text-center h-full flex flex-col justify-center">
+    <div class="text-xs text-gray-700 font-medium mb-2">Part Out</div>
+    <div class="space-y-1.5">
+        <div class="flex items-center justify-center gap-1 text-xs">
+            <span class="text-gray-600">N:</span>
+            <span id="partout-new-{{.ItemNo}}" class="font-bold text-new-price-700 text-xs">Calc...</span>
+        </div>
+        <div class="flex items-center justify-center gap-1 text-xs">
+            <span class="text-gray-600">U:</span>
+            <span id="partout-used-{{.ItemNo}}" class="font-bold text-used-price-700 text-xs">Calc...</span>
+        </div>
+    </div>
+</div>
+{{end}}

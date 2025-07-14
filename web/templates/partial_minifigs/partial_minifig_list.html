@@ -55,20 +55,20 @@
 
 {{define "partial-minifig-list-content"}}
 <div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div class="flex justify-between items-center mb-8">
         <div>
             <a href="/partial-minifigs-lists" 
                hx-get="/partial-minifigs-lists" 
                hx-target="main" 
                hx-swap="innerHTML"
                hx-push-url="/partial-minifigs-lists"
-               style="color: #2563eb; text-decoration: none; font-size: 0.875rem;">
+               class="text-blue-600 no-underline text-sm">
                 ← Back to Lists
             </a>
-            <h1 style="margin-top: 0.5rem;">{{.List.Name}}</h1>
-            <p style="color: #6b7280; margin-top: 0.25rem;">{{if .List.Description}}{{.List.Description}}{{end}}</p>
+            <h1 class="mt-2">{{.List.Name}}</h1>
+            <p class="text-gray-500 mt-1">{{if .List.Description}}{{.List.Description}}{{end}}</p>
         </div>
-        <div style="display: flex; gap: 0.5rem;">
+        <div class="flex gap-2">
             <button class="btn btn-secondary" 
                     hx-get="/partial-minifigs-lists/{{.List.ID}}/edit" 
                     hx-target="#modal-container" 
@@ -86,12 +86,12 @@
     
     <div id="list-items">
         {{if .List.PartialMinifigs}}
-            <h2 style="margin-bottom: 1rem; color: #374151;">Items</h2>
+            <h2 class="mb-4 text-gray-700">Items</h2>
             {{range .List.PartialMinifigs}}
                 {{template "partial_minifig_card" .}}
             {{end}}
         {{else}}
-            <div style="text-align: center; padding: 3rem; color: #6b7280;">
+            <div class="text-center p-12 text-gray-500">
                 <p>This list is empty. Add some items to get started!</p>
             </div>
         {{end}}
@@ -102,12 +102,12 @@
 {{define "list-items-section"}}
 <div id="list-items">
     {{if .List.PartialMinifigs}}
-        <h2 style="margin-bottom: 1rem; color: #374151;">Items</h2>
+        <h2 class="mb-4 text-gray-700">Items</h2>
         {{range .List.PartialMinifigs}}
             {{template "partial_minifig_card" .}}
         {{end}}
     {{else}}
-        <div style="text-align: center; padding: 3rem; color: #6b7280;">
+        <div class="text-center p-12 text-gray-500">
             <p>This list is empty. Add some items to get started!</p>
         </div>
     {{end}}

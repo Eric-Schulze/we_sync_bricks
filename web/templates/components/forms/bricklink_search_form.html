@@ -1,11 +1,11 @@
 {{define "bricklink-search-form"}}
-<div class="form-group" style="margin-bottom: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px;">
-    <h3 style="margin-bottom: 1rem; color: #374151;">Search Bricklink</h3>
-    <div style="display: flex; gap: 0.5rem;">
+<div class="form-group mb-8 p-4 bg-gray-50 rounded-lg">
+    <h3 class="mb-4 text-gray-700">Search Bricklink</h3>
+    <div class="flex gap-2">
         <input type="text" 
                id="bricklink-search" 
                placeholder="Enter Bricklink Minifig ID (e.g., sw0001a)" 
-               style="flex: 1; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 4px;">
+               class="flex-1 p-2 border border-gray-300 rounded">
         <button type="button" 
                 class="btn btn-secondary"
                 hx-post="/partial-minifigs-lists/search-bricklink"
@@ -15,6 +15,6 @@
             Search
         </button>
     </div>
-    <div id="search-results" style="margin-top: 1rem; min-height: 2rem;" class="flex-auto" data-list-id="{{.ListID}}"></div>
+    <div id="search-results" class="mt-4 min-h-8 flex-auto" data-list-id="{{.ListID}}"></div>
 </div>
 {{end}}

@@ -1,0 +1,15 @@
+{{define "price-piece-info"}}
+<div class="bg-used-price-50 border border-used-price-500 p-3 rounded-lg shadow-sm text-center h-full flex flex-col justify-center">
+    <div class="text-xs text-gray-700 font-medium mb-2">6 Month Qty</div>
+    <div class="space-y-1.5">
+        <div class="flex items-center justify-center gap-1 text-xs">
+            <span class="text-gray-600">New:</span>
+            <span id="piece-count-new-{{.ItemNo}}" class="font-bold text-lego-blue text-xs">Loading...</span>
+        </div>
+        <div class="flex items-center justify-center gap-1 text-xs">
+            <span class="text-gray-600">Used:</span>
+            <span id="piece-count-used-{{.ItemNo}}" class="font-bold text-lego-green text-xs">Loading...</span>
+        </div>
+    </div>
+</div>
+{{end}}

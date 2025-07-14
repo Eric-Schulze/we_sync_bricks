@@ -1,0 +1,49 @@
+{{define "minifig-details-form"}}
+<form id="minifig-details-form" onsubmit="return submitMinifigDetails(event)" class="flex flex-col" style="height: 460px;">
+    <div class="flex-1 space-y-4">
+        <div>
+            <label for="reference_id" class="block mb-2 font-medium text-gray-700">
+                Reference ID / Location:
+            </label>
+            <input type="text" 
+                   id="reference_id" 
+                   name="reference_id"
+                   placeholder="e.g., Box A, Shelf 2, etc." 
+                   class="w-full p-3 border border-gray-300 rounded-md text-sm">
+            <div class="text-xs text-gray-500 mt-1">
+                Optional: Where you store or found this minifig
+            </div>
+        </div>
+
+        <div>
+            <label for="condition" class="block mb-2 font-medium text-gray-700">
+                Condition you're trying to collect:
+            </label>
+            <select id="condition" 
+                    name="condition"
+                    class="w-full p-3 border border-gray-300 rounded-md text-sm bg-white">
+                <option value="">Select condition...</option>
+                <option value="N">New</option>
+                <option value="U">Used</option>
+            </select>
+            <div class="text-xs text-gray-500 mt-1">
+                What condition are you trying to collect for this minifig?
+            </div>
+        </div>
+
+        <div>
+            <label for="notes" class="block mb-2 font-medium text-gray-700">
+                Notes:
+            </label>
+            <textarea id="notes" 
+                      name="notes"
+                      rows="4"
+                      placeholder="Any notes about this minifig..." 
+                      class="w-full p-3 border border-gray-300 rounded-md text-sm resize-vertical"></textarea>
+            <div class="text-xs text-gray-500 mt-1">
+                Optional: Any notes or comments about this minifig
+            </div>
+        </div>
+    </div>
+</form>
+{{end}}

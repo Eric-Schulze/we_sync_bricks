@@ -855,3 +855,151 @@ func (handler *PartialMinifigHandler) HandleAddMinifigWithParts() http.HandlerFu
 		}
 	}
 }
+
+func (handler *PartialMinifigHandler) HandleMinifigDetailsModalGet() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Get current user from context (set by auth middleware)
+		user, ok := r.Context().Value(auth.UserContextKey).(*models.User)
+		if !ok {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// Try to parse form data first, then fall back to query parameters
+		if err := r.ParseForm(); err != nil {
+			logger.Error("Failed to parse form", "error", err)
+		}
+		
+		// Get parameters from form data first, then query parameters as fallback
+		itemID := r.FormValue("item_id")
+		if itemID == "" {
+			itemID = r.URL.Query().Get("item_id")
+		}
+		
+		listIDStr := r.FormValue("list_id")
+		if listIDStr == "" {
+			listIDStr = r.URL.Query().Get("list_id")
+		}
+		
+		partsJSON := r.FormValue("parts")
+		if partsJSON == "" {
+			partsJSON = r.URL.Query().Get("parts")
+		}
+
+		if itemID == "" || listIDStr == "" {
+			logger.Error("Missing required parameters", "item_id", itemID, "list_id", listIDStr)
+			http.Error(w, "Missing required parameters: item_id and list_id", http.StatusBadRequest)
+			return
+		}
+
+		listID, err := strconv.ParseInt(listIDStr, 10, 64)
+		if err != nil {
+			logger.Error("Invalid list_id", "list_id", listIDStr, "error", err)
+			http.Error(w, "Invalid list_id", http.StatusBadRequest)
+			return
+		}
+
+		// Parse parts JSON if provided
+		var parts []map[string]interface{}
+		if partsJSON != "" {
+			if err := json.Unmarshal([]byte(partsJSON), &parts); err != nil {
+				logger.Error("Failed to parse parts JSON", "error", err, "json", partsJSON)
+				http.Error(w, "Invalid parts data", http.StatusBadRequest)
+				return
+			}
+		}
+
+		// Get the list to ensure user has access
+		list, err := handler.service.GetPartialMinifigListByID(listID, user)
+		if err != nil {
+			logger.Error("Failed to get list", "list_id", listID, "user_id", user.ID, "error", err)
+			http.Error(w, "List not found", http.StatusNotFound)
+			return
+		}
+
+		logger.Info("Rendering minifig details modal (GET)", "user_id", user.ID, "item_id", itemID, "list_id", listID, "parts_count", len(parts))
+
+		// Prepare template data
+		data := map[string]interface{}{
+			"ItemID": itemID,
+			"List":   list,
+			"Parts":  parts,
+			"User":   user,
+		}
+
+		// Render the modal template
+		if err := handler.templates.ExecuteTemplate(w, "minifig-details-modal", data); err != nil {
+			logger.Error("Failed to execute modal template", "user_id", user.ID, "error", err)
+			http.Error(w, "Template error", http.StatusInternalServerError)
+		}
+	})
+}
+
+func (handler *PartialMinifigHandler) HandleMinifigDetailsModal() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Get current user from context (set by auth middleware)
+		user, ok := r.Context().Value(auth.UserContextKey).(*models.User)
+		if !ok {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// Parse form data
+		if err := r.ParseForm(); err != nil {
+			logger.Error("Failed to parse form", "error", err)
+			http.Error(w, "Bad request", http.StatusBadRequest)
+			return
+		}
+
+		itemID := r.FormValue("item_id")
+		listIDStr := r.FormValue("list_id")
+		partsJSON := r.FormValue("parts")
+
+		if itemID == "" || listIDStr == "" {
+			logger.Error("Missing required parameters", "item_id", itemID, "list_id", listIDStr)
+			http.Error(w, "Missing required parameters", http.StatusBadRequest)
+			return
+		}
+
+		listID, err := strconv.ParseInt(listIDStr, 10, 64)
+		if err != nil {
+			logger.Error("Invalid list_id", "list_id", listIDStr, "error", err)
+			http.Error(w, "Invalid list_id", http.StatusBadRequest)
+			return
+		}
+
+		// Parse parts JSON if provided
+		var parts []map[string]interface{}
+		if partsJSON != "" {
+			if err := json.Unmarshal([]byte(partsJSON), &parts); err != nil {
+				logger.Error("Failed to parse parts JSON", "error", err, "json", partsJSON)
+				http.Error(w, "Invalid parts data", http.StatusBadRequest)
+				return
+			}
+		}
+
+		// Get the list to ensure user has access
+		list, err := handler.service.GetPartialMinifigListByID(listID, user)
+		if err != nil {
+			logger.Error("Failed to get list", "list_id", listID, "user_id", user.ID, "error", err)
+			http.Error(w, "List not found", http.StatusNotFound)
+			return
+		}
+
+		logger.Info("Rendering minifig details modal", "user_id", user.ID, "item_id", itemID, "list_id", listID, "parts_count", len(parts))
+
+		// Prepare template data
+		data := map[string]interface{}{
+			"ItemID": itemID,
+			"List":   list,
+			"Parts":  parts,
+			"User":   user,
+		}
+
+		// Render the modal template
+		if err := handler.templates.ExecuteTemplate(w, "minifig-details-modal", data); err != nil {
+			logger.Error("Failed to execute modal template", "user_id", user.ID, "error", err)
+			http.Error(w, "Template error", http.StatusInternalServerError)
+		}
+	})
+}

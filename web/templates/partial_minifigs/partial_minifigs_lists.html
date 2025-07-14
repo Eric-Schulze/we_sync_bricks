@@ -55,7 +55,7 @@
 
 {{define "partial-minifigs-lists-content"}}
 <div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div class="flex justify-between items-center mb-8">
         <h1>Partial Minifigs Lists</h1>
         <button class="btn" 
                 hx-get="/partial-minifigs-lists/new" 
@@ -73,7 +73,7 @@
                 {{template "partial_minifigs_list_card" .}}
             {{end}}
         {{else}}
-            <div style="text-align: center; padding: 3rem; color: #6b7280;">
+            <div class="text-center p-12 text-gray-500">
                 <p>No lists found. Create your first list to get started!</p>
             </div>
         {{end}}

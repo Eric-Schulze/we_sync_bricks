@@ -1,0 +1,15 @@
+{{define "price-average"}}
+<div class="bg-new-price-50 border border-new-price-500 p-3 rounded-lg shadow-sm text-center h-full flex flex-col justify-center">
+    <div class="text-xs text-gray-700 font-medium mb-2">6 Month Avg</div>
+    <div class="space-y-1.5">
+        <div class="flex items-center justify-center gap-1 text-xs">
+            <span class="text-gray-600">N:</span>
+            <span id="price-new-{{.ItemNo}}" class="font-bold text-new-price-700 text-xs">Loading...</span>
+        </div>
+        <div class="flex items-center justify-center gap-1 text-xs">
+            <span class="text-gray-600">U:</span>
+            <span id="price-used-{{.ItemNo}}" class="font-bold text-used-price-700 text-xs">Loading...</span>
+        </div>
+    </div>
+</div>
+{{end}}

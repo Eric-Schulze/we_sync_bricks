@@ -1,45 +1,45 @@
 {{ define "partial_minifig_card" }}
-<div class="list-item" style="padding: 1.5rem; border: 1px solid #e5e7eb; border-radius: 12px; background-color: white; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
-    <div style="display: flex; gap: 1.5rem;">
+<div class="list-item p-6 border border-gray-200 rounded-xl bg-white mb-4 shadow-sm">
+    <div class="flex gap-6">
         <!-- Minifig Picture -->
-        <div style="flex: 0 0 120px;">
-            <div id="minifig-picture-{{.ID}}" style="width: 120px; height: 120px; background-color: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative;">
+        <div class="flex-none w-30">
+            <div id="minifig-picture-{{.ID}}" class="w-30 h-30 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center relative">
                 {{if .BricklinkID}}
-                    <div style="font-size: 2rem; color: #9ca3af;">📷</div>
-                    <div style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.7); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.6rem;">
+                    <div class="text-3xl text-gray-400">📷</div>
+                    <div class="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white px-1 py-0.5 rounded text-xs">
                         {{.BricklinkID}}
                     </div>
                 {{else}}
-                    <div style="text-align: center; color: #9ca3af;">
-                        <div style="font-size: 1.5rem;">📦</div>
-                        <div style="font-size: 0.7rem;">No ID</div>
+                    <div class="text-center text-gray-400">
+                        <div class="text-2xl">📦</div>
+                        <div class="text-xs">No ID</div>
                     </div>
                 {{end}}
             </div>
         </div>
         
         <!-- Minifig Information -->
-        <div style="flex: 1; display: flex; flex-direction: column;">
+        <div class="flex-1 flex flex-col">
             <!-- Header with Item Name and Actions -->
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+            <div class="flex justify-between items-start mb-4">
                 <div>
-                    <h3 style="margin: 0; color: #374151; font-size: 1.1rem; font-weight: 600;">
+                    <h3 class="m-0 text-gray-700 text-lg font-semibold">
                         {{if .ItemName}}{{.ItemName}}{{else if .BricklinkID}}{{.BricklinkID}}{{else}}Unknown Minifig{{end}}
                     </h3>
                     {{if .ReferenceID}}
-                        <div style="font-size: 0.8rem; color: #6b7280; margin-top: 0.25rem;">
+                        <div class="text-sm text-gray-500 mt-1">
                             🗃️ {{.ReferenceID}}
                         </div>
                     {{end}}
                 </div>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                <div class="flex gap-2">
+                    <button class="btn btn-secondary py-1 px-2 text-xs"
                             hx-get="/partial-minifigs-lists/{{.PartialMinifigListID}}/partial-minifig/{{.ID}}/edit" 
                             hx-target="#modal-container" 
                             hx-swap="innerHTML">
                         Edit
                     </button>
-                    <button class="btn" style="background: #dc2626; padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                    <button class="btn bg-red-600 py-1 px-2 text-xs"
                             hx-delete="/partial-minifigs-lists/{{.PartialMinifigListID}}/partial-minifig/{{.ID}}" 
                             hx-target="#list-items" 
                             hx-swap="outerHTML"
@@ -50,33 +50,33 @@
             </div>
             
             <!-- Details Grid -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="grid grid-cols-2 gap-4 mb-4">
                 <!-- Condition -->
                 <div>
-                    <div style="font-size: 0.75rem; color: #6b7280; font-weight: 500; margin-bottom: 0.25rem;">
+                    <div class="text-xs text-gray-500 font-medium mb-1">
                         CONDITION
                     </div>
-                    <div style="font-size: 0.875rem; color: #374151;">
+                    <div class="text-sm text-gray-700">
                         {{if .Condition}}
                             {{if eq .Condition "N"}}
-                                <span style="background: #d1fae5; color: #065f46; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">New</span>
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">New</span>
                             {{else if eq .Condition "U"}}
-                                <span style="background: #fed7aa; color: #9a3412; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Used</span>
+                                <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">Used</span>
                             {{else}}
                                 {{.Condition}}
                             {{end}}
                         {{else}}
-                            <span style="color: #9ca3af;">Not specified</span>
+                            <span class="text-gray-400">Not specified</span>
                         {{end}}
                     </div>
                 </div>
                 
                 <!-- Created Date -->
                 <div>
-                    <div style="font-size: 0.75rem; color: #6b7280; font-weight: 500; margin-bottom: 0.25rem;">
+                    <div class="text-xs text-gray-500 font-medium mb-1">
                         ADDED
                     </div>
-                    <div style="font-size: 0.875rem; color: #374151;">
+                    <div class="text-sm text-gray-700">
                         {{.CreatedAt.Format "Jan 2, 2006"}}
                     </div>
                 </div>
@@ -84,22 +84,22 @@
             
             <!-- Notes -->
             {{if .Notes}}
-                <div style="margin-bottom: 1rem;">
-                    <div style="font-size: 0.75rem; color: #6b7280; font-weight: 500; margin-bottom: 0.25rem;">
+                <div class="mb-4">
+                    <div class="text-xs text-gray-500 font-medium mb-1">
                         NOTES
                     </div>
-                    <div style="font-size: 0.875rem; color: #374151; background: #f8f9fa; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #3b82f6;">
+                    <div class="text-sm text-gray-700 bg-gray-50 p-3 rounded-md border-l-4 border-blue-500">
                         {{.Notes}}
                     </div>
                 </div>
             {{end}}
             
             <!-- Parts Summary -->
-            <div style="margin-top: auto;">
-                <div style="font-size: 0.75rem; color: #6b7280; font-weight: 500; margin-bottom: 0.25rem;">
+            <div class="mt-auto">
+                <div class="text-xs text-gray-500 font-medium mb-1">
                     PARTS PROGRESS
                 </div>
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div class="flex items-center gap-3">
                     {{if .Parts}}
                         {{$totalParts := 0}}
                         {{$totalNeeded := 0}}
@@ -114,28 +114,28 @@
                             {{$percentage = div (mul $totalCollected 100) $totalNeeded}}
                         {{end}}
                         
-                        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                            <div style="font-size: 0.875rem; color: #374151; font-weight: 500;">
+                        <div class="flex flex-col gap-1">
+                            <div class="text-sm text-gray-700 font-medium">
                                 {{$totalCollected}}/{{$totalNeeded}} pieces ({{$percentage}}%)
                             </div>
-                            <div style="font-size: 0.75rem; color: #6b7280;">
+                            <div class="text-xs text-gray-500">
                                 {{$totalParts}} unique parts
                             </div>
                         </div>
                         
                         <!-- Progress Bar -->
-                        <div style="flex: 1; max-width: 100px;">
-                            <div style="background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden;">
-                                <div style="background: {{if eq $percentage 100}}#10b981{{else}}#3b82f6{{end}}; height: 100%; width: {{$percentage}}%; transition: width 0.3s;"></div>
+                        <div class="flex-1 max-w-25">
+                            <div class="bg-gray-200 h-2 rounded overflow-hidden">
+                                <div class="h-full transition-all duration-300 {{if eq $percentage 100}}bg-green-500{{else}}bg-blue-500{{end}}" style="width: {{$percentage}}%;"></div>
                             </div>
                         </div>
                         
-                        <button style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; color: #6b7280; cursor: pointer;"
+                        <button class="bg-gray-100 border border-gray-300 py-1 px-2 rounded text-xs text-gray-500 cursor-pointer"
                                 onclick="togglePartsForMinifig({{.ID}})">
                             <span id="parts-toggle-{{.ID}}">Show Parts</span>
                         </button>
                     {{else}}
-                        <div style="font-size: 0.875rem; color: #9ca3af;">
+                        <div class="text-sm text-gray-400">
                             Parts not loaded
                         </div>
                     {{end}}
@@ -146,44 +146,44 @@
     
     <!-- Expandable Parts List -->
     {{if .Parts}}
-        <div id="parts-list-{{.ID}}" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
-            <div style="font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.75rem;">
+        <div id="parts-list-{{.ID}}" class="hidden mt-4 pt-4 border-t border-gray-200">
+            <div class="text-sm font-medium text-gray-700 mb-3">
                 Required Parts ({{len .Parts}})
             </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.75rem;">
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-3">
                 {{range .Parts}}
-                    <div style="background: #f8f9fa; padding: 0.75rem; border-radius: 6px; border: 1px solid #e5e7eb; {{if eq .QuantityCollected .QuantityNeeded}}border-color: #10b981;{{end}}">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                            <div style="font-size: 0.8rem; font-weight: 500; color: #374151;">
+                    <div class="bg-gray-50 p-3 rounded-md border border-gray-200 {{if eq .QuantityCollected .QuantityNeeded}}border-green-500{{end}}">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="text-xs font-medium text-gray-700">
                                 {{if .PartName}}{{.PartName}}{{else if .BricklinkID}}{{.BricklinkID}}{{else}}Part {{.ItemID}}{{end}}
                             </div>
-                            <div style="font-size: 0.75rem; color: #374151; font-weight: 600;">
+                            <div class="text-xs text-gray-700 font-semibold">
                                 {{.QuantityCollected}}/{{.QuantityNeeded}}
                             </div>
                         </div>
                         
-                        <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.5rem;">
+                        <div class="text-xs text-gray-500 mb-2">
                             {{if .BricklinkID}}ID: {{.BricklinkID}}{{else}}Item: {{.ItemID}}{{end}}
                             {{if .ColorID}} | Color: {{.ColorID}}{{end}}
                             {{if .Condition}} | {{if eq .Condition "N"}}New{{else if eq .Condition "U"}}Used{{else}}{{.Condition}}{{end}}{{end}}
                         </div>
                         
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div class="flex items-center justify-between">
                             <!-- Progress for this part -->
-                            <div style="flex: 1; margin-right: 0.5rem;">
+                            <div class="flex-1 mr-2">
                                 {{$partPercentage := 0}}
                                 {{if gt .QuantityNeeded 0}}
                                     {{$partPercentage = div (mul .QuantityCollected 100) .QuantityNeeded}}
                                 {{end}}
-                                <div style="background: #e5e7eb; height: 6px; border-radius: 3px; overflow: hidden;">
-                                    <div style="background: {{if eq .QuantityCollected .QuantityNeeded}}#10b981{{else}}#3b82f6{{end}}; height: 100%; width: {{$partPercentage}}%; transition: width 0.3s;"></div>
+                                <div class="bg-gray-200 h-1.5 rounded-sm overflow-hidden">
+                                    <div class="h-full transition-all duration-300 {{if eq .QuantityCollected .QuantityNeeded}}bg-green-500{{else}}bg-blue-500{{end}}" style="width: {{$partPercentage}}%;"></div>
                                 </div>
                             </div>
                             
                             {{if eq .QuantityCollected .QuantityNeeded}}
-                                <span style="background: #d1fae5; color: #065f46; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem;">✓ Complete</span>
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">✓ Complete</span>
                             {{else}}
-                                <span style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem;">{{$partPercentage}}%</span>
+                                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">{{$partPercentage}}%</span>
                             {{end}}
                         </div>
                     </div>
@@ -240,11 +240,8 @@ function loadMinifigPictureForCard(minifigId, cardId) {
             const firstImage = data.data;
             const imageUrl = firstImage.thumbnail_url || firstImage.url;
             if (imageUrl) {
-                pictureContainer.innerHTML = '<img src="' + imageUrl + '" alt="Minifig ' + minifigId + '" style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px;"><div style="position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.7); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.6rem;">' + minifigId + '</div>';
-                pictureContainer.style.display = 'flex';
-                pictureContainer.style.alignItems = 'center';
-                pictureContainer.style.justifyContent = 'center';
-                pictureContainer.style.position = 'relative';
+                pictureContainer.innerHTML = '<img src="' + imageUrl + '" alt="Minifig ' + minifigId + '" class="max-w-full max-h-full object-contain rounded-lg"><div class="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white px-1 py-0.5 rounded text-xs">' + minifigId + '</div>';
+                pictureContainer.className = pictureContainer.className.replace('flex items-center justify-center relative', '') + ' flex items-center justify-center relative';
             }
         } else {
             console.log('Picture API failed for card:', cardId, data && data.meta ? data.meta.message : 'Unknown error');

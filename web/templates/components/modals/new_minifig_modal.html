@@ -1,11 +1,18 @@
 {{define "new-minifig-modal"}}
 <div class="modal-overlay" hx-on:click="if(event.target === this) this.remove()">
-    <div class="modal" style="max-width: 800px; width: 90vw;">
-        <h2>Add New Minifigure</h2>
+    <div class="modal max-w-6xl relative" style="width: 95vw;">
+        <!-- Close Button -->
+        <button type="button" onclick="document.getElementById('modal-container').innerHTML = ''" class="absolute top-4 right-4 bg-none border-none text-gray-400 cursor-pointer transition-colors z-10 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        
+        <h2 class="pr-8">Add New Minifigure</h2>
         
         {{template "bricklink-search-form" .}}
 
-        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+        <div class="flex gap-2 justify-end">
             <button type="button" class="btn btn-secondary" 
                     onclick="document.getElementById('modal-container').innerHTML = ''">
                 Close

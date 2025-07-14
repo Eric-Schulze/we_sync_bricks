@@ -6,13 +6,14 @@ import (
 
 // PartialMinifigList represents a collection of partial minifigs based on partial_minifig_lists table
 type PartialMinifigList struct {
-	ID              int64            `json:"id" db:"id"`
-	Name            string           `json:"name" db:"name"`
-	Description     *string          `json:"description" db:"description"`
-	UserID          int64            `json:"user_id" db:"user_id"`
-	PartialMinifigs []PartialMinifig `json:"partial_minifigs" db:"-"`
-	CreatedAt       time.Time        `json:"created_at" db:"created_at"`
-	UpdatedAt       *time.Time       `json:"updated_at" db:"updated_at"`
+	ID                  int64            `json:"id" db:"id"`
+	Name                string           `json:"name" db:"name"`
+	Description         *string          `json:"description" db:"description"`
+	UserID              int64            `json:"user_id" db:"user_id"`
+	PartialMinifigs     []PartialMinifig `json:"partial_minifigs" db:"-"`
+	PartialMinifigCount int64            `json:"partial_minifig_count" db:"-"`
+	CreatedAt           time.Time        `json:"created_at" db:"created_at"`
+	UpdatedAt           *time.Time       `json:"updated_at" db:"updated_at"`
 }
 
 // PartialMinifig represents a single partial minifig based on partial_minifigs table

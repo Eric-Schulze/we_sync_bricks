@@ -35,5 +35,7 @@ func (handler *PartialMinifigHandler) RegisterRoutes(router chi.Router) {
 		router.Post("/part-picture", handler.HandleGetPartPicture())
 		router.Post("/part-pricing", handler.HandleGetPartPricing())
 		router.Post("/add-minifig-with-parts", handler.HandleAddMinifigWithParts())
+		router.Get("/minifig-details-modal", handler.HandleMinifigDetailsModalGet())
+		router.Post("/minifig-details-modal", handler.HandleMinifigDetailsModal())
 	})
 }

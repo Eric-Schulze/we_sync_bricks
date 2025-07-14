@@ -1,184 +1,58 @@
 {{define "minifig-details-modal"}}
-<div class="modal-overlay" id="minifig-details-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;" hx-on:click="if(event.target === this) closeMinifigDetailsModal()">
-    <div class="modal" style="background: white; border-radius: 8px; padding: 2rem; max-width: 500px; width: 90vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);">
-        <h2 style="margin: 0 0 1.5rem 0; color: #374151; text-align: center;">Minifig Details</h2>
+<div class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="minifig-details-overlay" onclick="if(event.target === this) closeMinifigDetailsModal()">
+    <div class="modal bg-white rounded-lg p-6 max-w-none shadow-2xl relative overflow-hidden" style="width: 95vw; max-width: 1400px; height: auto; max-height: 90vh;">
+        <!-- Close Button -->
+        <button type="button" onclick="closeMinifigDetailsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
         
-        <form id="minifig-details-form" onsubmit="return submitMinifigDetails(event)">
-            <div style="margin-bottom: 1rem;">
-                <label for="reference_id" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">
-                    Reference ID / Location:
-                </label>
-                <input type="text" 
-                       id="reference_id" 
-                       name="reference_id"
-                       placeholder="e.g., Box A, Shelf 2, etc." 
-                       style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem;">
-                <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">
-                    Optional: Where you store or found this minifig
+        <h2 class="m-0 mb-6 text-gray-700 text-center text-xl font-semibold pr-8">Minifig Details</h2>
+        
+        <!-- Two Column Layout -->
+        <div class="flex gap-6">
+            <!-- Left Column: Parts Selection -->
+            <div class="flex-1 min-w-0">
+                <div class="flex flex-col">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Select the parts you currently have:</h3>
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm text-gray-600">
+                                <span id="modal-parts-count">{{if .Parts}}{{len .Parts}}{{else}}0{{end}}</span> parts available
+                            </div>
+                            <button type="button" id="modal-select-all" onclick="toggleAllModalParts()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                                Select All
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="modal-parts-list" class="overflow-y-auto pr-2 space-y-2 border border-gray-200 rounded-lg p-4 bg-gray-50" style="height: 400px;">
+                        {{if .Parts}}
+                            {{range $index, $part := .Parts}}
+                                {{$partId := printf "modal-part-%d-%s" $index .ItemId}}
+                                {{template "minifig-part" (dict "PartId" $partId "ItemId" .ItemId "PartNo" $part.PartNo "PartName" $part.PartName "Quantity" $part.Quantity "ColorId" $part.ColorId "ItemType" $part.ItemType)}}
+                            {{end}}
+                        {{else}}
+                            <div class="text-gray-500 text-center py-8">No parts available</div>
+                        {{end}}
+                    </div>
                 </div>
             </div>
-
-            <div style="margin-bottom: 1rem;">
-                <label for="condition" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">
-                    Condition you're trying to collect:
-                </label>
-                <select id="condition" 
-                        name="condition"
-                        style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; background: white;">
-                    <option value="">Select condition...</option>
-                    <option value="N">New</option>
-                    <option value="U">Used</option>
-                </select>
-                <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">
-                    What condition are you trying to collect for this minifig?
-                </div>
+            
+            <!-- Right Column: Form Fields -->
+            <div class="flex-1 min-w-0">
+                {{template "minifig-details-form" .}}
             </div>
-
-            <div style="margin-bottom: 1.5rem;">
-                <label for="notes" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">
-                    Notes:
-                </label>
-                <textarea id="notes" 
-                          name="notes"
-                          rows="3"
-                          placeholder="Any notes about this minifig..." 
-                          style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; resize: vertical;"></textarea>
-                <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">
-                    Optional: Any notes or comments about this minifig
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
-                <button type="button" 
-                        onclick="closeMinifigDetailsModal()"
-                        style="background: #6b7280; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 0.875rem; cursor: pointer; transition: background-color 0.2s;"
-                        onmouseover="this.style.backgroundColor='#4b5563'"
-                        onmouseout="this.style.backgroundColor='#6b7280'">
-                    Cancel
-                </button>
-                <button type="submit"
-                        style="background: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 0.875rem; cursor: pointer; transition: background-color 0.2s;"
-                        onmouseover="this.style.backgroundColor='#2563eb'"
-                        onmouseout="this.style.backgroundColor='#3b82f6'">
-                    Add Minifig and Parts
-                </button>
-            </div>
-        </form>
+        </div>
+        
+        <!-- Full-width centered button -->
+        <div class="flex justify-center mt-8 pt-6">
+            <button type="submit" form="minifig-details-form"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-16 py-5 rounded-lg text-xl font-semibold transition-colors shadow-md hover:shadow-lg">
+                Add Minifig and Parts
+            </button>
+        </div>
     </div>
 </div>
-
-<script>
-// Store the current minifig data for when the modal is submitted
-window.currentMinifigData = window.currentMinifigData || {};
-
-function closeMinifigDetailsModal() {
-    const overlay = document.getElementById('minifig-details-overlay');
-    if (overlay) {
-        overlay.remove();
-    }
-}
-
-function submitMinifigDetails(event) {
-    event.preventDefault();
-    
-    const form = event.target;
-    const formData = new FormData(form);
-    
-    // Get the stored minifig data
-    const minifigData = window.currentMinifigData;
-    if (!minifigData || !minifigData.itemId || !minifigData.selectedParts) {
-        alert('Missing minifig data. Please try again.');
-        return false;
-    }
-    
-    // Collect form data
-    const referenceId = formData.get('reference_id') || '';
-    const condition = formData.get('condition') || '';
-    const notes = formData.get('notes') || '';
-    
-    // Set condition for each part if a global condition was selected
-    if (condition) {
-        minifigData.selectedParts.forEach(part => {
-            part.condition = condition;
-        });
-    }
-    
-    console.log('Submitting minifig with details:', {
-        itemId: minifigData.itemId,
-        referenceId: referenceId,
-        condition: condition,
-        notes: notes,
-        selectedParts: minifigData.selectedParts
-    });
-    
-    // Close the modal
-    closeMinifigDetailsModal();
-    
-    // Disable the add button while processing
-    const addButton = document.getElementById('add-minifig-' + minifigData.itemId);
-    if (addButton) {
-        addButton.disabled = true;
-        addButton.textContent = 'Adding...';
-    }
-    
-    // Make API call to add minifig with parts and details
-    fetch('/partial-minifigs-lists/add-minifig-with-parts', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'list_id=' + encodeURIComponent(minifigData.listId) +
-              '&minifig_id=' + encodeURIComponent(minifigData.itemId) +
-              '&reference_id=' + encodeURIComponent(referenceId) +
-              '&condition=' + encodeURIComponent(condition) +
-              '&notes=' + encodeURIComponent(notes) +
-              '&selected_parts=' + encodeURIComponent(JSON.stringify(minifigData.selectedParts))
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return response.text();
-    })
-    .then(html => {
-        console.log('Successfully added minifig and parts with details');
-        
-        // Update the list items section with the returned HTML
-        const listItemsSection = document.querySelector('[data-section="list-items"]');
-        if (listItemsSection) {
-            listItemsSection.innerHTML = html;
-        }
-        
-        // Close any remaining modals
-        const modalContainer = document.getElementById('modal-container');
-        if (modalContainer) {
-            modalContainer.innerHTML = '';
-        }
-        
-        // Show success message
-        if (typeof showNotification === 'function') {
-            showNotification('Successfully added ' + minifigData.itemId + ' with ' + minifigData.selectedParts.length + ' parts to your list!', 'success');
-        } else {
-            alert('Successfully added ' + minifigData.itemId + ' with ' + minifigData.selectedParts.length + ' parts to your list!');
-        }
-    })
-    .catch(error => {
-        console.error('Error adding minifig and parts:', error);
-        if (typeof showErrorMessage === 'function') {
-            showErrorMessage(minifigData.itemId, 'Failed to add minifig and parts: ' + error.message);
-        } else {
-            alert('Failed to add minifig and parts: ' + error.message);
-        }
-    })
-    .finally(() => {
-        // Re-enable the button
-        if (addButton) {
-            addButton.disabled = false;
-            addButton.textContent = 'Add Minifig and Parts';
-        }
-    });
-    
-    return false;
-}
-</script>
 {{end}}

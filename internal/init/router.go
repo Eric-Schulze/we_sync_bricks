@@ -25,6 +25,11 @@ func initRouter(app *models.App) *chi.Mux {
 
 	// Static files
 	fileServer(router, "/static/", http.Dir("web/static/"))
+	
+	// Favicon route
+	router.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/static/favicon.ico")
+	})
 
 	// Register service routes using injected handlers
 	if authHandler, ok := app.AuthHandler.(*auth.AuthHandler); ok {

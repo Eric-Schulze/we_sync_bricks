@@ -1,19 +1,18 @@
 {{ define "partial_minifigs_list_card" }}
-<div class="list-item" 
+<div class="list-item cursor-pointer" 
      hx-get="/partial-minifigs-lists/{{.ID}}" 
      hx-target="main" 
      hx-swap="innerHTML"
-     hx-push-url="/partial-minifigs-lists/{{.ID}}"
-     style="cursor: pointer;">
-    <div style="display: flex; justify-content: space-between; align-items: start;">
-        <div style="flex: 1;">
+     hx-push-url="/partial-minifigs-lists/{{.ID}}">
+    <div class="flex justify-between items-start">
+        <div class="flex-1">
             <h3>{{ .Name }}</h3>
             <p>{{if .Description}}{{.Description}}{{end}}</p>
         </div>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <div style="text-align: right; color: #6b7280; font-size: 0.875rem;">
-                <div style="font-weight: 600; color: #374151;">{{len .PartialMinifigs}}</div>
-                <div>{{if eq (len .PartialMinifigs) 1}}item{{else}}items{{end}}</div>
+        <div class="flex items-center gap-4">
+            <div class="text-right text-gray-500 text-sm">
+                <div class="font-semibold text-gray-700">{{.PartialMinifigCount}}</div>
+                <div>{{if eq .PartialMinifigCount 1}}item{{else}}items{{end}}</div>
             </div>
         </div>
     </div>

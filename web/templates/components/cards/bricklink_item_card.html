@@ -1,16 +1,13 @@
 {{define "bricklink-item-card"}}
-<div class="search-result minifig-card" style="padding: 1.5rem; border: 2px solid #e5e7eb; border-radius: 12px; background-color: white; margin: 1rem 0;">
-    <!-- Top Section: Picture and Basic Info -->
-    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+<div class="search-result minifig-card p-5 border-2 border-gray-200 rounded-xl bg-white my-4">
+    <!-- Main Section: Picture and Basic Info -->
+    <div class="flex gap-4 items-center">
         {{template "minifig-picture" (dict "ItemNo" .Item.No)}}
         {{template "minifig-info" (dict "Name" .Item.Name "ItemNo" .Item.No)}}
     </div>
     
-    <!-- Parts List Section -->
-    {{template "parts-list-container" (dict "ItemNo" .Item.No)}}
-    
-    <!-- Add Minifig Button -->
-    {{template "add-minifig-button" (dict "ItemNo" .Item.No)}}
+    <!-- Hidden field to store parts data -->
+    <input type="hidden" id="parts-data-{{.Item.No}}" value="">
 </div>
 
 {{template "bricklink-item-scripts" .}}
@@ -19,7 +16,19 @@
 // Auto-load details when this specific item is rendered
 (function() {
     const itemId = '{{.Item.No}}';
-    initializeBricklinkItem(itemId);
+    
+    function tryInitialize() {
+        if (typeof initializeBricklinkItem === 'function') {
+            console.log('Initializing minifig:', itemId);
+            initializeBricklinkItem(itemId);
+        } else {
+            console.log('Function not yet available, retrying in 100ms for:', itemId);
+            setTimeout(tryInitialize, 100);
+        }
+    }
+    
+    // Try immediately, then with small delay if needed
+    tryInitialize();
 })();
 </script>
 {{end}}

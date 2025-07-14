@@ -7,35 +7,43 @@ This directory contains reusable template components organized by logical functi
 ```
 components/
 ├── cards/
-│   ├── bricklink_item_card.html    # Complete Bricklink item with parts selection
-│   ├── minifig_info.html           # Minifig name, ID, and pricing display
-│   ├── minifig_picture.html        # Minifig image container
-│   └── price_display.html          # New/Used price grid
+│   ├── bricklink_item_card.html         # Complete Bricklink item with parts selection
+│   ├── minifig_picture.html             # Minifig image with loading state  
+│   ├── minifig_info.html                # Minifig name, ID, and pricing display
+│   └── price_display.html               # New/Used price grid
 ├── forms/
-│   ├── add_minifig_button.html     # Action button with error handling
-│   └── bricklink_search_form.html  # Search input and results container
+│   ├── add_minifig_button.html          # Action button with validation
+│   ├── bricklink_search_form.html       # Search input and results container
+│   └── minifig_details_form.html        # Form for reference ID, condition, notes
 ├── modals/
-│   ├── base_modal.html             # Reusable modal wrapper
-│   └── new_minifig_modal.html      # Specific modal for adding minifigs
+│   ├── base_modal.html                  # Reusable modal wrapper
+│   ├── minifig_details_modal.html       # Modal for parts selection and details
+│   └── new_minifig_modal.html           # Search modal for adding minifigs
 ├── parts/
-│   ├── bricklink_item_scripts.html # JavaScript functionality for Bricklink items
-│   └── parts_list_container.html   # Collapsible parts list with toggle
-└── helpers.html                    # Template helper functions
+│   ├── bricklink_item_scripts.html      # JavaScript includes
+│   ├── minifig_part.html                # Individual part card for modal
+│   └── parts_list_container.html        # Collapsible parts list with toggle
+└── helpers.html                         # Template helper functions
 ```
 
-## Usage
+## Component-Based Architecture
 
-### Basic Components
+**Individual components that work together, avoiding duplication:**
+
+### Core Components
 
 ```html
 {{/* Minifig picture with loading state */}}
 {{template "minifig-picture" (dict "ItemNo" .Item.No)}}
 
+{{/* Minifig info with name, ID, button */}}
+{{template "minifig-info" (dict "Name" .Item.Name "ItemNo" .Item.No)}}
+
 {{/* Price display grid */}}
 {{template "price-display" (dict "ItemNo" .Item.No)}}
 
 {{/* Add button with validation */}}
-{{template "add-minifig-button" (dict "ItemNo" .Item.No "ButtonText" "Custom Text")}}
+{{template "add-minifig-button" (dict "ItemNo" .Item.No)}}
 ```
 
 ### Complex Components
@@ -44,39 +52,57 @@ components/
 {{/* Complete Bricklink item card */}}
 {{template "bricklink-item-card" .}}
 
-{{/* Modal with search form */}}
-{{template "new-minifig-modal" .}}
+{{/* Modal with parts selection and form */}}
+{{template "minifig-details-modal" .}}
+
+{{/* Collapsible parts list */}}
+{{template "parts-list-container" (dict "ItemNo" .Item.No)}}
 ```
 
-### Data Passing
+## Legacy Components
 
-Components use the `dict` template function to pass named parameters:
+### Still Active
 
 ```html
-{{template "component-name" (dict "Key1" .Value1 "Key2" "literal value")}}
+{{/* Complete Bricklink item card - now uses consolidated template */}}
+{{template "bricklink-item-card" .}}
+
+{{/* Search modal */}}
+{{template "new-minifig-modal" .}}
+
+{{/* Search form */}}
+{{template "bricklink-search-form" .}}
 ```
+
+### Deprecated Components
+
+These templates have been removed and consolidated:
+- ~~`minifig-picture`~~ - Now part of consolidated template
+- ~~`minifig-info`~~ - Now part of consolidated template  
+- ~~`price-display`~~ - Now part of consolidated template
+- ~~`minifig-part`~~ - Now part of consolidated template
+- ~~`add-minifig-button`~~ - Now part of consolidated template
+- ~~`minifig-details-form`~~ - Now part of consolidated template
+- ~~`minifig-details-modal`~~ - Now part of consolidated template
+- ~~`parts-list-container`~~ - Now part of consolidated template
+- ~~`bricklink-item-scripts`~~ - Replaced by `/static/js/minifig-parts.js`
 
 ## Features
 
 - **Responsive Design**: All components adapt to container width
+- **Template-Based**: Uses `<template>` tags for reusable DOM elements
+- **Data-Driven**: JavaScript builds data objects instead of HTML strings
 - **Interactive Elements**: Card selection, toggleable parts lists, modal overlays
 - **Error Handling**: Built-in validation and user feedback
 - **Accessibility**: Proper focus management and keyboard navigation
-- **Reusability**: Components can be combined and customized via parameters
-
-## Customization
-
-Most components support customization through template variables:
-
-- `MaxWidth`: Modal maximum width (default: "600px")
-- `ButtonText`: Custom button text
-- `ShowCloseButton`: Whether to show close button (default: true)
-- `CloseButtonText`: Custom close button text (default: "Close")
+- **Performance**: No string concatenation for HTML generation
 
 ## JavaScript Integration
 
-The `bricklink_item_scripts.html` component provides:
+The `/static/js/minifig-parts.js` file provides:
 
+- **Template Utilization**: Uses `cloneNode()` to populate templates
+- **Data Management**: Clean separation between data and presentation
 - **Auto-loading**: Pictures, pricing, and parts data
 - **Part Selection**: Click-to-select card interface
 - **Validation**: Error messages for empty selections

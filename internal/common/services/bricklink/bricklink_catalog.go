@@ -123,6 +123,8 @@ func (blClient BricklinkCatalogClient) GetPriceGuideByType(item_type string, ite
 	if color_id > 0 {
 		params = append(params, "color_id="+strconv.Itoa(color_id))
 	}
+	// Add guide_type=sold to get total_quantity data
+	params = append(params, "guide_type=sold")
 
 	if len(params) > 0 {
 		endpoint += "?" + strings.Join(params, "&")
