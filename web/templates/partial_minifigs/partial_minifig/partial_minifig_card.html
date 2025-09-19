@@ -1,0 +1,7 @@
+{{ define "partial_minifig_card" }}
+<div class="list-item p-6 border border-gray-200 rounded-xl bg-white mb-4 shadow-sm">
+    {{template "partial-minifig-info" .}}
+    {{template "partial-minifig-parts-progress" .}}
+    {{template "partial-minifig-parts" (dict "ID" .ID "Parts" .Parts "ShowSelection" false "ShowPricing" false "ShowImage" false "ShowHover" false)}}
+</div>
+{{ end }}

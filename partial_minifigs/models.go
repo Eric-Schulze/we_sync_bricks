@@ -39,6 +39,8 @@ type PartialMinifigPart struct {
 	ColorID           int64      `json:"color_id" db:"color_id"`
 	BricklinkID       *string    `json:"bricklink_id" db:"bricklink_id"`
 	PartName          *string    `json:"part_name" db:"part_name"`
+	ColorName         *string    `json:"color_name" db:"color_name"`
+	ColorCode         *string    `json:"color_code" db:"color_code"`
 	Condition         *string    `json:"condition" db:"condition"`
 	QuantityNeeded    int        `json:"quantity_needed" db:"quantity_needed"`
 	QuantityCollected int        `json:"quantity_collected" db:"quantity_collected"`

@@ -8,14 +8,18 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/eric-schulze/we_sync_bricks/internal/common/models"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/auth"
+	"github.com/eric-schulze/we_sync_bricks/internal/common/services/bricklink"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/dashboard"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/db"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/logger"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/profile"
+	"github.com/eric-schulze/we_sync_bricks/orders"
 	"github.com/eric-schulze/we_sync_bricks/partial_minifigs"
+	"github.com/eric-schulze/we_sync_bricks/webhooks"
 )
 
 func Start(ctx context.Context, w io.Writer, args []string) error {
@@ -25,7 +29,7 @@ func Start(ctx context.Context, w io.Writer, args []string) error {
 
 	// Initialize logging system
 	logFilePath := "logs/app.log"
-	err := logger.InitializeDefaultLogger(logger.LogInfo, logFilePath)
+	err := logger.InitializeDefaultLogger(logger.LogDebug, logFilePath)
 	if err != nil {
 		log.Printf("Failed to initialize logger: %v", err)
 		// Fall back to standard logging
@@ -89,9 +93,11 @@ func initApp(context context.Context) (*models.App, error) {
 	jwtSecret := []byte("your-jwt-secret-key") // TODO: Move to config
 
 	app.AuthHandler = auth.InitializeAuthHandler(dbService, templates, jwtSecret)
-	app.ProfileHandler = profile.InitializeProfileHandler(dbService, templates, jwtSecret)
+	app.ProfileHandler = profile.InitializeProfileHandler(dbService, templates, jwtSecret, &app.Config)
 	app.PartialMinifigHandler = partial_minifigs.InitializePartialMinifigHandler(dbService, templates, jwtSecret)
 	app.DashboardHandler = dashboard.InitializeDashboardHandler(dbService, templates, jwtSecret)
+	app.OrdersHandler = orders.InitializeOrdersHandler(dbService, templates, jwtSecret)
+	app.WebhookHandler = webhooks.NewWebhookHandler(&app)
 
 	return &app, nil
 }

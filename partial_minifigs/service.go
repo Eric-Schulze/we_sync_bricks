@@ -350,7 +350,7 @@ func (s *PartialMinifigService) DeletePartialMinifig(listID, itemID int64, user 
 }
 
 // AddMinifigWithParts adds a new partial minifig with selected parts to a list
-func (s *PartialMinifigService) AddMinifigWithParts(listID int64, minifigID string, referenceID *string, condition *string, notes *string, selectedParts []SelectedPart, user *models.User) (*PartialMinifigList, error) {
+func (s *PartialMinifigService) AddMinifigWithParts(listID int64, minifigID string, minifigName string, referenceID *string, condition *string, notes *string, selectedParts []SelectedPart, user *models.User) (*PartialMinifigList, error) {
 	logger.Info("Service: Starting AddMinifigWithParts", "list_id", listID, "minifig_id", minifigID, "parts_count", len(selectedParts), "user_id", user.ID)
 
 	if minifigID == "" {
@@ -371,7 +371,7 @@ func (s *PartialMinifigService) AddMinifigWithParts(listID int64, minifigID stri
 	}
 
 	// Create the partial minifig entry
-	partialMinifig, err := s.repo.CreatePartialMinifigWithParts(listID, minifigID, referenceID, condition, notes, selectedParts, user.ID)
+	partialMinifig, err := s.repo.CreatePartialMinifigWithParts(listID, minifigID, minifigName, referenceID, condition, notes, selectedParts, user.ID)
 	if err != nil {
 		logger.Error("Service: Failed to create partial minifig with parts", "list_id", listID, "minifig_id", minifigID, "user_id", user.ID, "error", err)
 		return nil, err
@@ -381,6 +381,40 @@ func (s *PartialMinifigService) AddMinifigWithParts(listID int64, minifigID stri
 
 	// Return the updated list
 	return s.repo.GetPartialMinifigListByID(listID, user.ID)
+}
+
+// AddMinifigWithPartsNoReturn adds a new partial minifig with selected parts to a list without returning the updated list
+func (s *PartialMinifigService) AddMinifigWithPartsNoReturn(listID int64, minifigID string, minifigName string, referenceID *string, condition *string, notes *string, selectedParts []SelectedPart, user *models.User) error {
+	logger.Info("Service: Starting AddMinifigWithPartsNoReturn", "list_id", listID, "minifig_id", minifigID, "parts_count", len(selectedParts), "user_id", user.ID)
+
+	if minifigID == "" {
+		logger.Warn("Service: AddMinifigWithPartsNoReturn called with empty minifig ID", "user_id", user.ID)
+		return errors.New("minifig ID cannot be empty")
+	}
+
+	if len(selectedParts) == 0 {
+		logger.Warn("Service: AddMinifigWithPartsNoReturn called with no selected parts", "user_id", user.ID)
+		return errors.New("at least one part must be selected")
+	}
+
+	// Verify that the list exists and belongs to the user
+	_, err := s.repo.GetPartialMinifigListByID(listID, user.ID)
+	if err != nil {
+		logger.Error("Service: Failed to get partial minifig list", "list_id", listID, "user_id", user.ID, "error", err)
+		return err
+	}
+
+	// Create the partial minifig entry
+	partialMinifig, err := s.repo.CreatePartialMinifigWithParts(listID, minifigID, minifigName, referenceID, condition, notes, selectedParts, user.ID)
+	if err != nil {
+		logger.Error("Service: Failed to create partial minifig with parts", "list_id", listID, "minifig_id", minifigID, "user_id", user.ID, "error", err)
+		return err
+	}
+
+	logger.Info("Service: Successfully created partial minifig with parts", "list_id", listID, "minifig_id", minifigID, "partial_minifig_id", partialMinifig.ID, "user_id", user.ID)
+
+	// Don't return any data, just success
+	return nil
 }
 
 // SelectedPart represents a part selected by the user to be added

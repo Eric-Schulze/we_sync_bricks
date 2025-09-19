@@ -1,0 +1,22 @@
+{{define "color-display"}}
+{{if .ColorCode}}
+    <div class="inline-flex items-center gap-1">
+        <div class="w-3 h-3 rounded-full flex-shrink-0" 
+             style="background-color: #{{.ColorCode}};" 
+             title="Color: {{if .ColorName}}{{.ColorName}}{{else}}Unknown{{end}} ({{.ColorCode}})"></div>
+        <span class="text-xs text-gray-600">{{if .ColorName}}{{.ColorName}}{{else}}Color {{.ColorID}}{{end}}</span>
+    </div>
+{{else if .ColorName}}
+    <div class="inline-flex items-center gap-1">
+        <div class="w-3 h-3 rounded-full bg-gray-200 flex-shrink-0" 
+             title="Color: {{.ColorName}} (no color code)"></div>
+        <span class="text-xs text-gray-600">{{.ColorName}}</span>
+    </div>
+{{else if .ColorID}}
+    <div class="inline-flex items-center gap-1">
+        <div class="w-3 h-3 rounded-full bg-gray-200 flex-shrink-0" 
+             title="Color ID: {{.ColorID}} (color not found in database)"></div>
+        <span class="text-xs text-gray-500">Color {{.ColorID}}</span>
+    </div>
+{{end}}
+{{end}}

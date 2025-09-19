@@ -7,6 +7,7 @@ import (
 	"github.com/eric-schulze/we_sync_bricks/internal/common/models"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/db"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/logger"
+	"github.com/jackc/pgx/v5"
 )
 
 type ProfileRepository struct {
@@ -133,9 +134,14 @@ func (r *ProfileRepository) GetUserOAuthCredentials(userID int64, provider strin
 
 	credential, err := db.QueryRowToStructFromService[UserOAuthCredential](r.db, sql, userID, provider)
 	if err != nil {
-		// It's OK if no credentials exist yet
-		logger.Debug("No OAuth credentials found", "user_id", userID, "provider", provider)
-		return nil, nil
+		if err == pgx.ErrNoRows {
+			// It's OK if no credentials exist yet
+			logger.Debug("No OAuth credentials found", "user_id", userID, "provider", provider)
+			return nil, nil
+		}
+		// Log actual errors
+		logger.Error("Error retrieving OAuth credentials", "user_id", userID, "provider", provider, "error", err)
+		return nil, err
 	}
 
 	logger.Debug("Successfully retrieved OAuth credentials", "user_id", userID, "provider", provider)

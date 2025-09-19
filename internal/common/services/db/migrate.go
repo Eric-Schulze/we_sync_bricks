@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
-	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/eric-schulze/we_sync_bricks/internal/common/models"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/logger"
@@ -17,10 +17,10 @@ import (
 var createDatabaseMigrationName = "0001_InitialMigration.sql"
 
 type migration struct {
-	file_name  string
-	version    string
-	name       string
-	created_at string
+	FileName  string    `db:"file_name"`
+	Version   string    `db:"version"`
+	Name      string    `db:"name"`
+	CreatedAt time.Time `db:"created_at"`
 }
 
 // loadDBConfigForMigration loads database configuration from config file
@@ -95,7 +95,7 @@ func migrateDB(db PGDBService) {
 		// Get existing migrations and find where to start
 		var migrations []string
 		for _, migration := range getMigrations(db) {
-			migrations = append(migrations, migration.file_name)
+			migrations = append(migrations, migration.FileName)
 		}
 
 		if len(migrations) > 0 {
@@ -104,7 +104,13 @@ func migrateDB(db PGDBService) {
 
 			// Find the index of the last migration and start from the next one
 			lastMigration := migrations[len(migrations)-1]
-			startIndex := slices.Index(files, lastMigration)
+			startIndex := -1
+			for i, file := range files {
+				if filepath.Base(file) == lastMigration {
+					startIndex = i
+					break
+				}
+			}
 			if startIndex >= 0 && startIndex < len(files)-1 {
 				files = files[startIndex+1:]
 			} else {

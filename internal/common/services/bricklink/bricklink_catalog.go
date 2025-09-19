@@ -196,3 +196,27 @@ func (blClient BricklinkCatalogClient) GetPartPictures(item_type string, item_id
 	logger.Info("Bricklink Client: Successfully retrieved part pictures", "item_type", item_type, "item_id", item_id, "color_id", color_id, "response_length", len(response.responseStr))
 	return response.responseStr, nil
 }
+
+// GetColors retrieves all colors from BrickLink API
+func (blClient BricklinkCatalogClient) GetColors() (string, error) {
+	logger.Debug("Bricklink Client: Starting GetColors request")
+
+	endpoint := "/colors"
+	logger.Debug("Bricklink Client: Making API request", "endpoint", endpoint)
+
+	response, err := blClient.BLGet(endpoint)
+	if err != nil {
+		logger.Error("Bricklink Client: Colors API request failed", "endpoint", endpoint, "error", err)
+		return "", err
+	}
+
+	logger.Debug("Bricklink Client: Colors API request completed", "response_code", response.Meta.Code, "response_message", response.Meta.Message)
+
+	if response.Meta.Code != 200 {
+		logger.Error("Bricklink Client: Colors API returned error response", "code", response.Meta.Code, "message", response.Meta.Message, "description", response.Meta.Description)
+		return "", errors.New("Failed to get colors from BrickLink: " + strconv.Itoa(response.Meta.Code) + " " + response.Meta.Message)
+	}
+
+	logger.Debug("Bricklink Client: Successfully retrieved colors", "response_length", len(response.responseStr))
+	return response.responseStr, nil
+}

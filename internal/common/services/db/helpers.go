@@ -49,7 +49,7 @@ func QueryRowToStructFromService[T any](dbService models.DBService, query string
 	defer rows.Close()
 
 	if !rows.Next() {
-		logger.Error("No rows found", "query", query)
+		logger.Debug("No rows found", "query", query)
 		return result, pgx.ErrNoRows
 	}
 
@@ -61,7 +61,7 @@ func QueryRowToStructFromService[T any](dbService models.DBService, query string
 	}
 
 	if len(results) == 0 {
-		logger.Error("No rows found", "query", query)
+		logger.Debug("No rows found", "query", query)
 		return result, pgx.ErrNoRows
 	}
 

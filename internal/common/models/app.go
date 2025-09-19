@@ -5,8 +5,13 @@ import (
 	"html/template"
 )
 
+type AppSettings struct {
+	BaseURL string `mapstructure:"base_url"`
+}
+
 type AppConfig struct {
-	DBConfig DBConfig `mapstructure:"db"`
+	DBConfig    DBConfig    `mapstructure:"db"`
+	AppSettings AppSettings `mapstructure:"app"`
 }
 
 type App struct {
@@ -18,4 +23,6 @@ type App struct {
 	ProfileHandler        interface{} // Will be *profile.ProfileHandler
 	PartialMinifigHandler interface{} // Will be *partial_minifigs.PartialMinifigHandler
 	DashboardHandler      interface{} // Will be *dashboard.DashboardHandler
+	OrdersHandler         interface{} // Will be *orders.OrdersHandler
+	WebhookHandler        interface{} // Will be *webhooks.WebhookHandler
 }

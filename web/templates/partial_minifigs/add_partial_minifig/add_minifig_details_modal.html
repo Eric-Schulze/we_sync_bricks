@@ -15,19 +15,17 @@
             <!-- Left Column: Parts Selection -->
             <div class="flex-1 min-w-0">
                 <div class="flex flex-col">
-                    <div class="mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Select the parts you currently have:</h3>
-                        <div class="flex items-center justify-between">
-                            <div class="text-sm text-gray-600">
-                                <span id="modal-parts-count">{{if .Parts}}{{len .Parts}}{{else}}0{{end}}</span> parts available
-                            </div>
-                            <button type="button" id="modal-select-all" onclick="toggleAllModalParts()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                                Select All
-                            </button>
-                        </div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Select the parts you currently have:</h3>
+                        <button type="button" id="modal-select-all" onclick="toggleAllModalParts()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                            Select All
+                        </button>
                     </div>
                     
                     <div id="modal-parts-list" class="overflow-y-auto pr-2 space-y-2 border border-gray-200 rounded-lg p-4 bg-gray-50" style="height: 400px;">
+                        <div class="text-sm text-gray-600 mb-3 pb-2 border-b border-gray-300">
+                            <span id="modal-parts-count">{{if .Parts}}{{len .Parts}}{{else}}0{{end}}</span> parts available
+                        </div>
                         {{if .Parts}}
                             {{range $index, $part := .Parts}}
                                 {{$partId := printf "modal-part-%d-%s" $index .ItemId}}
@@ -42,13 +40,13 @@
             
             <!-- Right Column: Form Fields -->
             <div class="flex-1 min-w-0">
-                {{template "minifig-details-form" .}}
+                {{template "add-minifig-details-form" .}}
             </div>
         </div>
         
         <!-- Full-width centered button -->
         <div class="flex justify-center mt-8 pt-6">
-            <button type="submit" form="minifig-details-form"
+            <button type="button" onclick="submitMinifigDetails(event)"
                     class="bg-blue-500 hover:bg-blue-600 text-white px-16 py-5 rounded-lg text-xl font-semibold transition-colors shadow-md hover:shadow-lg">
                 Add Minifig and Parts
             </button>

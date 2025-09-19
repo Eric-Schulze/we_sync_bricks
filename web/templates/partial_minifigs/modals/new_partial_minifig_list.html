@@ -3,7 +3,6 @@
     <div class="modal">
         <h2>Create New List</h2>
         <form hx-post="/partial-minifigs-lists"
-              hx-on::after-request="document.getElementById('modal-container').innerHTML = ''"
               hx-on::response-error="alert('Error creating list: ' + event.detail.xhr.responseText)">
             
             <div class="form-group">

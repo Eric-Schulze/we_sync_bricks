@@ -1,4 +1,4 @@
-{{define "bricklink-item-card"}}
+{{define "bricklink-search-result-card"}}
 <div class="search-result minifig-card p-5 border-2 border-gray-200 rounded-xl bg-white my-4">
     <!-- Main Section: Picture and Basic Info -->
     <div class="flex gap-4 items-center">
@@ -6,8 +6,9 @@
         {{template "minifig-info" (dict "Name" .Item.Name "ItemNo" .Item.No)}}
     </div>
     
-    <!-- Hidden field to store parts data -->
+    <!-- Hidden fields to store data -->
     <input type="hidden" id="parts-data-{{.Item.No}}" value="">
+    <input type="hidden" id="item-name-{{.Item.No}}" value="{{.Item.Name}}">
 </div>
 
 {{template "bricklink-item-scripts" .}}

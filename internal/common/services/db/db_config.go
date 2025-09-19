@@ -61,12 +61,12 @@ func NewPg(ctx context.Context, dbConfig *models.DBConfig, pgxConfig *pgx.ConnCo
 	config.HealthCheckPeriod = dbConfig.HealthCheckPeriod
 
 	config.BeforeAcquire = func(ctx context.Context, c *pgx.Conn) bool {
-		logger.Info("Before acquiring the connection pool to the database!!")
+		logger.Verbose("Before acquiring the connection pool to the database!!")
 		return true
 	}
 
 	config.AfterRelease = func(c *pgx.Conn) bool {
-		logger.Info("After releasing the connection pool to the database!!")
+		logger.Verbose("After releasing the connection pool to the database!!")
 		return true
 	}
 
@@ -74,7 +74,7 @@ func NewPg(ctx context.Context, dbConfig *models.DBConfig, pgxConfig *pgx.ConnCo
 		logger.Info("Closed the connection pool to the database!!")
 	}
 
-	logger.Info("config", "config", config)
+	logger.Debug("Database pool configuration created", "max_conns", config.MaxConns, "min_conns", config.MinConns, "max_conn_lifetime", config.MaxConnLifetime, "health_check_period", config.HealthCheckPeriod)
 
 	// Initialize the pool with singleton pattern
 	var db *pgxpool.Pool

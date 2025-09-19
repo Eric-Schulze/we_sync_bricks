@@ -1,0 +1,528 @@
+{{define "orders_table"}}
+<div id="orders-table-content">
+    <!-- Loading indicator -->
+    <div id="loading" class="htmx-indicator fixed top-4 right-4 bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg z-50">
+        <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Loading...
+    </div>
+    {{if .SyncStatus}}
+        {{if eq .SyncStatus "completed"}}
+            {{if gt .SyncCount 0}}
+                <!-- Success with orders synced -->
+                <div class="rounded-md bg-green-50 p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-green-800">Sync Complete</h3>
+                            <div class="mt-2 text-sm text-green-700">
+                                <p>Successfully synchronized {{.SyncCount}} orders from BrickLink</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {{else}}
+                <!-- Success but no orders updated -->
+                <div class="rounded-md bg-blue-50 p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">Everything Up to Date</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <p>No new orders found. Your orders are up to date.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {{end}}
+        {{else if eq .SyncStatus "failed"}}
+            <!-- Sync failed -->
+            <div class="rounded-md bg-red-50 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Sync Failed</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p>{{if .SyncError}}{{.SyncError}}{{else}}Failed to sync orders from BrickLink. Please try again.{{end}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {{end}}
+    {{end}}
+
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <!-- Filters and Search Section -->
+            <div class="mb-6 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        Orders ({{.OrdersCount}})
+                    </h3>
+                    
+                    <!-- Search Input -->
+                    <div class="flex-1 max-w-lg">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input type="text" 
+                                   name="search" 
+                                   id="search"
+                                   value="{{.Filters.Search}}"
+                                   placeholder="Search by buyer, store, seller, or order ID..."
+                                   class="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                   hx-get="/orders"
+                                   hx-target="#orders-table-content"
+                                   hx-trigger="input changed delay:500ms, search"
+                                   hx-include="[name=`status`], [name=`date_from`], [name=`date_to`], [name=`limit`]"
+                                   hx-push-url="true"
+                                   hx-indicator="#loading">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filters Row -->
+                <div class="flex flex-wrap gap-4 items-end">
+                    <!-- Status Filter -->
+                    <div class="min-w-0 flex-1 max-w-xs">
+                        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select name="status" 
+                                id="status"
+                                class="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                hx-get="/orders"
+                                hx-target="#orders-table-content"
+                                hx-trigger="change"
+                                hx-include="[name=`search`], [name=`date_from`], [name=`date_to`], [name=`limit`]"
+                                hx-push-url="true"
+                                hx-indicator="#loading">
+                            <option value="" {{if eq .Filters.Status ``}}selected{{end}}>All Statuses</option>
+                            <option value="Pending" {{if eq .Filters.Status `Pending`}}selected{{end}}>Pending</option>
+                            <option value="Updated" {{if eq .Filters.Status `Updated`}}selected{{end}}>Updated</option>
+                            <option value="Processing" {{if eq .Filters.Status `Processing`}}selected{{end}}>Processing</option>
+                            <option value="Ready" {{if eq .Filters.Status `Ready`}}selected{{end}}>Ready</option>
+                            <option value="Paid" {{if eq .Filters.Status `Paid`}}selected{{end}}>Paid</option>
+                            <option value="Packed" {{if eq .Filters.Status `Packed`}}selected{{end}}>Packed</option>
+                            <option value="Shipped" {{if eq .Filters.Status `Shipped`}}selected{{end}}>Shipped</option>
+                            <option value="Received" {{if eq .Filters.Status `Received`}}selected{{end}}>Received</option>
+                            <option value="Completed" {{if eq .Filters.Status `Completed`}}selected{{end}}>Completed</option>
+                            <option value="Cancelled" {{if eq .Filters.Status `Cancelled`}}selected{{end}}>Cancelled</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Date From -->
+                    <div class="min-w-0 flex-1 max-w-xs">
+                        <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+                        <input type="date" 
+                               name="date_from" 
+                               id="date_from"
+                               value="{{.Filters.DateFrom}}"
+                               class="block w-full rounded-md border border-gray-300 py-2 pl-3 pr-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                               hx-get="/orders"
+                               hx-target="#orders-table-content"
+                               hx-trigger="change"
+                               hx-include="[name=`search`], [name=`status`], [name=`date_to`], [name=`limit`]"
+                               hx-push-url="true"
+                               hx-indicator="#loading">
+                    </div>
+                    
+                    <!-- Date To -->
+                    <div class="min-w-0 flex-1 max-w-xs">
+                        <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+                        <input type="date" 
+                               name="date_to" 
+                               id="date_to"
+                               value="{{.Filters.DateTo}}"
+                               class="block w-full rounded-md border border-gray-300 py-2 pl-3 pr-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                               hx-get="/orders"
+                               hx-target="#orders-table-content"
+                               hx-trigger="change"
+                               hx-include="[name=`search`], [name=`status`], [name=`date_from`], [name=`limit`]"
+                               hx-push-url="true"
+                               hx-indicator="#loading">
+                    </div>
+                    
+                    <!-- Items per page -->
+                    <div class="min-w-0 flex-1 max-w-xs">
+                        <label for="limit" class="block text-sm font-medium text-gray-700 mb-1">Per Page</label>
+                        <select name="limit" 
+                                id="limit"
+                                class="block w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                hx-get="/orders"
+                                hx-target="#orders-table-content"
+                                hx-trigger="change"
+                                hx-include="[name=`search`], [name=`status`], [name=`date_from`], [name=`date_to`], [name=`limit`]"
+                                hx-push-url="true"
+                                hx-indicator="#loading">
+                            <option value="10" {{if eq .Filters.Limit 10}}selected{{end}}>10</option>
+                            <option value="25" {{if eq .Filters.Limit 25}}selected{{end}}>25</option>
+                            <option value="50" {{if eq .Filters.Limit 50}}selected{{end}}>50</option>
+                            <option value="100" {{if eq .Filters.Limit 100}}selected{{end}}>100</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Clear Filters Button -->
+                    {{if or .Filters.Search .Filters.Status .Filters.DateFrom .Filters.DateTo}}
+                    <div>
+                        <button type="button" 
+                                class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                hx-get="/orders"
+                                hx-target="#orders-table-content"
+                                hx-push-url="true"
+                                hx-indicator="#loading">
+                            <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Clear Filters
+                        </button>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+            
+            {{if .Orders}}
+                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-300">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <!-- Sortable Order ID Column -->
+                                <th scope="col">
+                                    <button type="button" class="column-header {{.Sort.SortClass `bricklink_order_id`}}"
+                                            hx-get="/orders?sort=bricklink_order_id&order={{.Sort.NextOrder `bricklink_order_id`}}"
+                                            hx-target="#orders-table-content"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading">
+                                        Order ID
+                                        <span class="sort-indicator">
+                                            {{if and (.Sort.IsActive `bricklink_order_id`) (eq .Sort.Order `asc`)}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11.586l-2.293 2.293a1 1 0 001.414 1.414l4-4a1 1 0 000-1.414l-4-4a1 1 0 10-1.414 1.414L14.586 3H3z" /></svg>
+                                            {{else}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                            {{end}}
+                                        </span>
+                                    </button>
+                                </th>
+                                
+                                <!-- Site Column (Non-sortable) -->
+                                <th scope="col" class="column-header-static">Site</th>
+                                
+                                <!-- Sortable Date Column -->
+                                <th scope="col">
+                                    <button type="button" class="column-header {{.Sort.SortClass `date_ordered`}}"
+                                            hx-get="/orders?sort=date_ordered&order={{.Sort.NextOrder `date_ordered`}}"
+                                            hx-target="#orders-table-content"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading">
+                                        Date
+                                        <span class="sort-indicator">
+                                            {{if and (.Sort.IsActive "date_ordered") (eq .Sort.Order `asc`)}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11.586l-2.293 2.293a1 1 0 001.414 1.414l4-4a1 1 0 000-1.414l-4-4a1 1 0 10-1.414 1.414L14.586 3H3z" /></svg>
+                                            {{else}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                            {{end}}
+                                        </span>
+                                    </button>
+                                </th>
+                                
+                                <!-- Sortable Buyer Column -->
+                                <th scope="col">
+                                    <button type="button" class="column-header {{.Sort.SortClass "buyer_name"}}"
+                                            hx-get="/orders?sort=buyer_name&order={{.Sort.NextOrder `buyer_name`}}"
+                                            hx-target="#orders-table-content"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading">
+                                        Buyer
+                                        <span class="sort-indicator">
+                                            {{if and (.Sort.IsActive `buyer_name`) (eq .Sort.Order `asc`)}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11.586l-2.293 2.293a1 1 0 001.414 1.414l4-4a1 1 0 000-1.414l-4-4a1 1 0 10-1.414 1.414L14.586 3H3z" /></svg>
+                                            {{else}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                            {{end}}
+                                        </span>
+                                    </button>
+                                </th>
+                                
+                                <!-- Sortable Orders (Buyer Order Count) Column -->
+                                <th scope="col">
+                                    <button type="button" class="column-header {{.Sort.SortClass `buyer_order_count`}}"
+                                            hx-get="/orders?sort=buyer_order_count&order={{.Sort.NextOrder `buyer_order_count`}}"
+                                            hx-target="#orders-table-content"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading">
+                                        Orders
+                                        <span class="sort-indicator">
+                                            {{if and (.Sort.IsActive `buyer_order_count`) (eq .Sort.Order `asc`)}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11.586l-2.293 2.293a1 1 0 001.414 1.414l4-4a1 1 0 000-1.414l-4-4a1 1 0 10-1.414 1.414L14.586 3H3z" /></svg>
+                                            {{else}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                            {{end}}
+                                        </span>
+                                    </button>
+                                </th>
+                                
+                                <!-- Sortable Status Column -->
+                                <th scope="col">
+                                    <button type="button" class="column-header {{.Sort.SortClass `status`}}"
+                                            hx-get="/orders?sort=status&order={{.Sort.NextOrder `status`}}"
+                                            hx-target="#orders-table-content"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading">
+                                        Status
+                                        <span class="sort-indicator">
+                                            {{if and (.Sort.IsActive `status`) (eq .Sort.Order `asc`)}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11.586l-2.293 2.293a1 1 0 001.414 1.414l4-4a1 1 0 000-1.414l-4-4a1 1 0 10-1.414 1.414L14.586 3H3z" /></svg>
+                                            {{else}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                            {{end}}
+                                        </span>
+                                    </button>
+                                </th>
+                                
+                                <!-- Sortable Pieces (Total Count) Column -->
+                                <th scope="col">
+                                    <button type="button" class="column-header {{.Sort.SortClass `total_count`}}"
+                                            hx-get="/orders?sort=total_count&order={{.Sort.NextOrder `total_count`}}"
+                                            hx-target="#orders-table-content"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading">
+                                        Pieces
+                                        <span class="sort-indicator">
+                                            {{if and (.Sort.IsActive `total_count`) (eq .Sort.Order `asc`)}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11.586l-2.293 2.293a1 1 0 001.414 1.414l4-4a1 1 0 000-1.414l-4-4a1 1 0 10-1.414 1.414L14.586 3H3z" /></svg>
+                                            {{else}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                            {{end}}
+                                        </span>
+                                    </button>
+                                </th>
+                                
+                                <!-- Sortable Lots (Unique Count) Column -->
+                                <th scope="col">
+                                    <button type="button" class="column-header {{.Sort.SortClass `unique_count`}}"
+                                            hx-get="/orders?sort=unique_count&order={{.Sort.NextOrder `unique_count`}}"
+                                            hx-target="#orders-table-content"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading">
+                                        Lots
+                                        <span class="sort-indicator">
+                                            {{if and (.Sort.IsActive `unique_count`) (eq .Sort.Order `asc`)}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11.586l-2.293 2.293a1 1 0 001.414 1.414l4-4a1 1 0 000-1.414l-4-4a1 1 0 10-1.414 1.414L14.586 3H3z" /></svg>
+                                            {{else}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                            {{end}}
+                                        </span>
+                                    </button>
+                                </th>
+                                
+                                <!-- Sortable Total Price Column -->
+                                <th scope="col">
+                                    <button type="button" class="column-header {{.Sort.SortClass `total_price`}}"
+                                            hx-get="/orders?sort=total_price&order={{.Sort.NextOrder `total_price`}}"
+                                            hx-target="#orders-table-content"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading">
+                                        Total
+                                        <span class="sort-indicator">
+                                            {{if and (.Sort.IsActive `total_price`) (eq .Sort.Order `asc`)}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11.586l-2.293 2.293a1 1 0 001.414 1.414l4-4a1 1 0 000-1.414l-4-4a1 1 0 10-1.414 1.414L14.586 3H3z" /></svg>
+                                            {{else}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                            {{end}}
+                                        </span>
+                                    </button>
+                                </th>
+                                
+                                <!-- Sortable Currency Column -->
+                                <th scope="col">
+                                    <button type="button" class="column-header {{.Sort.SortClass `currency_code`}}"
+                                            hx-get="/orders?sort=currency_code&order={{.Sort.NextOrder `currency_code`}}"
+                                            hx-target="#orders-table-content"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading">
+                                        Currency
+                                        <span class="sort-indicator">
+                                            {{if and (.Sort.IsActive `currency_code`) (eq .Sort.Order `asc`)}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11.586l-2.293 2.293a1 1 0 001.414 1.414l4-4a1 1 0 000-1.414l-4-4a1 1 0 10-1.414 1.414L14.586 3H3z" /></svg>
+                                            {{else}}
+                                                <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                            {{end}}
+                                        </span>
+                                    </button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {{range .Orders}}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    #{{.BricklinkOrderID}}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        BrickLink
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{.DateOrdered.Format "2006-01-02"}}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{.BuyerName}}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{if .BuyerOrderCount}}{{.BuyerOrderCount}}{{else}}-{{end}}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                        {{if eq .Status `Paid`}}bg-green-100 text-green-800{{else if eq .Status `Pending`}}bg-yellow-100 text-yellow-800{{else}}bg-gray-100 text-gray-800{{end}}">
+                                        {{.Status}}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{if .TotalCount}}{{.TotalCount}}{{else}}-{{end}}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{if .UniqueCount}}{{.UniqueCount}}{{else}}-{{end}}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{printf "%.2f" .TotalPrice}}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{.CurrencyCode}}
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {{if gt .Pagination.Total 1}}
+                <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        {{if .Pagination.HasPrev}}
+                        <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                hx-get="/orders?page={{.Pagination.PrevPage}}&limit={{.Filters.Limit}}&sort={{.Filters.Sort}}&order={{.Filters.Order}}{{if .Filters.Status}}&status={{.Filters.Status}}{{end}}{{if .Filters.Search}}&search={{.Filters.Search}}{{end}}{{if .Filters.DateFrom}}&date_from={{.Filters.DateFrom}}{{end}}{{if .Filters.DateTo}}&date_to={{.Filters.DateTo}}{{end}}"
+                                hx-target="#orders-table-content"
+                                hx-push-url="true"
+                                hx-indicator="#loading">
+                            Previous
+                        </button>
+                        {{end}}
+                        {{if .Pagination.HasNext}}
+                        <button class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                hx-get="/orders?page={{.Pagination.NextPage}}&limit={{.Filters.Limit}}&sort={{.Filters.Sort}}&order={{.Filters.Order}}{{if .Filters.Status}}&status={{.Filters.Status}}{{end}}{{if .Filters.Search}}&search={{.Filters.Search}}{{end}}{{if .Filters.DateFrom}}&date_from={{.Filters.DateFrom}}{{end}}{{if .Filters.DateTo}}&date_to={{.Filters.DateTo}}{{end}}"
+                                hx-target="#orders-table-content"
+                                hx-push-url="true"
+                                hx-indicator="#loading">
+                            Next
+                        </button>
+                        {{end}}
+                    </div>
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                Showing
+                                <span class="font-medium">{{.Pagination.ShowingFrom}}</span>
+                                to
+                                <span class="font-medium">{{.Pagination.ShowingTo}}</span>
+                                of
+                                <span class="font-medium">{{.Pagination.TotalItems}}</span>
+                                results
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                <!-- Previous Button -->
+                                {{if .Pagination.HasPrev}}
+                                <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                                        hx-get="/orders?page={{.Pagination.PrevPage}}&limit={{.Filters.Limit}}&sort={{.Filters.Sort}}&order={{.Filters.Order}}{{if .Filters.Status}}&status={{.Filters.Status}}{{end}}{{if .Filters.Search}}&search={{.Filters.Search}}{{end}}{{if .Filters.DateFrom}}&date_from={{.Filters.DateFrom}}{{end}}{{if .Filters.DateTo}}&date_to={{.Filters.DateTo}}{{end}}"
+                                        hx-target="#orders-table-content"
+                                        hx-push-url="true"
+                                        hx-indicator="#loading">
+                                    <span class="sr-only">Previous</span>
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                {{else}}
+                                <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-300 cursor-not-allowed">
+                                    <span class="sr-only">Previous</span>
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                                {{end}}
+                                
+                                <!-- Page Numbers -->
+                                {{range .Pagination.Pages}}
+                                    {{if eq . $.Pagination.Current}}
+                                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-indigo-50 text-sm font-medium text-indigo-600">
+                                        {{.}}
+                                    </span>
+                                    {{else}}
+                                    <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                            hx-get="/orders?page={{.}}&limit={{$.Filters.Limit}}&sort={{$.Filters.Sort}}&order={{$.Filters.Order}}{{if $.Filters.Status}}&status={{$.Filters.Status}}{{end}}{{if $.Filters.Search}}&search={{$.Filters.Search}}{{end}}{{if $.Filters.DateFrom}}&date_from={{$.Filters.DateFrom}}{{end}}{{if $.Filters.DateTo}}&date_to={{$.Filters.DateTo}}{{end}}"
+                                            hx-target="#orders-table-content"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading">
+                                        {{.}}
+                                    </button>
+                                    {{end}}
+                                {{end}}
+                                
+                                <!-- Next Button -->
+                                {{if .Pagination.HasNext}}
+                                <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                                        hx-get="/orders?page={{.Pagination.NextPage}}&limit={{.Filters.Limit}}&sort={{.Filters.Sort}}&order={{.Filters.Order}}{{if .Filters.Status}}&status={{.Filters.Status}}{{end}}{{if .Filters.Search}}&search={{.Filters.Search}}{{end}}{{if .Filters.DateFrom}}&date_from={{.Filters.DateFrom}}{{end}}{{if .Filters.DateTo}}&date_to={{.Filters.DateTo}}{{end}}"
+                                        hx-target="#orders-table-content"
+                                        hx-push-url="true"
+                                        hx-indicator="#loading">
+                                    <span class="sr-only">Next</span>
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                {{else}}
+                                <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-300 cursor-not-allowed">
+                                    <span class="sr-only">Next</span>
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                                {{end}}
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            {{else}}
+                <div class="text-center p-12 text-gray-500">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6l3 12h6l3-12h6M15 21h18M12 9v12h24V9H12z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No orders found</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Click "Refresh Orders" to sync your latest orders from BrickLink.
+                    </p>
+                </div>
+            {{end}}
+        </div>
+    </div>
+</div>
+{{end}}

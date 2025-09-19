@@ -53,6 +53,19 @@ status_db:
 migrate_db:
 	PGPASSWORD=postgres go run cmd/migrate/main.go
 
+# BrickLink data sync commands
+sync-colors:
+	@echo "Syncing BrickLink colors to database..."
+	go run cmd/sync-colors/main.go
+
+sync-colors-info:
+	@echo "Showing BrickLink colors sync information..."
+	go run cmd/sync-colors/main.go -info
+
+sync-colors-verbose:
+	@echo "Syncing BrickLink colors to database (verbose)..."
+	go run cmd/sync-colors/main.go -v
+
 # Database backup and restore commands
 dump_db:
 	@echo "Creating database dump..."
@@ -222,4 +235,4 @@ setup: tidy fmt vet
 all: clean fmt vet test build
 	@echo "All tasks completed"
 
-.PHONY: build clean dev run build-css build-css-prod fix_db_permissions check_db_status start_db connect_db stop_db restart_db status_db migrate_db dump_db dump_db_data_only dump_db_schema_only drop_db drop_db_force create_postgres_user create_postgres_user_force init_db recreate_db recreate_db_force setup_db_complete setup_db_complete_force load_db backup_before_drop test_db_connection show_pg_hba show_users show_current_user debug_connection test fmt vet tidy docker-build docker-run docker-down setup all
+.PHONY: build clean dev run build-css build-css-prod fix_db_permissions check_db_status start_db connect_db stop_db restart_db status_db migrate_db sync-colors sync-colors-info sync-colors-verbose dump_db dump_db_data_only dump_db_schema_only drop_db drop_db_force create_postgres_user create_postgres_user_force init_db recreate_db recreate_db_force setup_db_complete setup_db_complete_force load_db backup_before_drop test_db_connection show_pg_hba show_users show_current_user debug_connection test fmt vet tidy docker-build docker-run docker-down setup all

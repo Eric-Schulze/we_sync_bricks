@@ -1,0 +1,101 @@
+{{define "account-settings"}}
+{{template "authed_base.html" .}}
+{{end}}
+
+{{define "account-settings-content"}}
+<div class="space-y-6">
+    <div>
+        <h1 class="page-heading">Account Settings</h1>
+        <p class="text-gray-600 mt-2">Manage your account configuration and integrations</p>
+    </div>
+
+    <!-- BrickLink Integration Section -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">BrickLink Integration</h3>
+            
+            <!-- Webhook URL Section -->
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Webhook URL
+                    </label>
+                    <p class="text-sm text-gray-500 mb-3">
+                        Use this URL when configuring push notifications in your BrickLink API settings. 
+                        This allows WE Sync Bricks to receive real-time notifications for new orders and updates.
+                    </p>
+                    <div class="flex rounded-md shadow-sm">
+                        <input type="text" 
+                               value="{{.WebhookURL}}" 
+                               readonly
+                               class="flex-1 min-w-0 block w-full px-3 py-2 rounded-l-md border border-gray-300 bg-gray-50 text-gray-900 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <button type="button" 
+                                onclick="copyToClipboard('{{.WebhookURL}}')"
+                                class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-gray-500 text-sm hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span class="ml-1">Copy</span>
+                        </button>
+                    </div>
+                    <div class="mt-2">
+                        <p class="text-xs text-gray-500">
+                            <strong>Instructions:</strong> 
+                            1. Go to your BrickLink API settings
+                            2. Add this URL as your push notification callback URL
+                            3. Enable notifications for order events
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Status Information -->
+                <div class="border-t border-gray-200 pt-4">
+                    <h4 class="text-sm font-medium text-gray-900 mb-2">Integration Status</h4>
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                Webhook configured but not yet tested. Configure this URL in BrickLink to enable real-time notifications.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Settings Section (Future) -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">General Settings</h3>
+            <p class="text-sm text-gray-500">Additional account settings will be available here in future updates.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show success feedback
+        const button = event.target.closest('button');
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<svg class="h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg><span class="ml-1 text-green-500">Copied!</span>';
+        
+        setTimeout(() => {
+            button.innerHTML = originalContent;
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy to clipboard');
+    });
+}
+</script>
+{{end}}
+
+{{define "content"}}
+{{template "account-settings-content" .}}
+{{end}}

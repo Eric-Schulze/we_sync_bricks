@@ -1,0 +1,35 @@
+{{define "partial_minifig_lists"}}
+{{template "authed_base.html" .}}
+{{end}}
+
+{{define "partial-minifigs-lists-content"}}
+<div>
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="page-heading">Partial Minifigs Lists</h1>
+        <button class="btn" 
+                hx-get="/partial-minifigs-lists/new" 
+                hx-target="#modal-container" 
+                hx-swap="innerHTML">
+            <span class="htmx-indicator"><span class="spinner"></span></span>
+            <span class="plus-icon plus-icon-md mr-2"></span>
+            Create New List
+        </button>
+    </div>
+    
+    <div id="lists-container">
+        {{if .Lists}}
+            {{range .Lists}}
+                {{template "partial_minifigs_list_card" .}}
+            {{end}}
+        {{else}}
+            <div class="text-center p-12 text-gray-500">
+                <p>No lists found. Create your first list to get started!</p>
+            </div>
+        {{end}}
+    </div>
+</div>
+{{end}}
+
+{{define "content"}}
+{{template "partial-minifigs-lists-content" .}}
+{{end}}

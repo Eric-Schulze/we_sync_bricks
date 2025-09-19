@@ -1,6 +1,7 @@
 package init
 
 import (
+	"maps"
 	"errors"
 	"html/template"
 	"reflect"
@@ -29,14 +30,16 @@ func GetCustomTemplateFunctions() template.FuncMap {
 		"ge":      greaterThanOrEqual,
 		"len":     length,
 		"str":     toString,
+		"deref":   derefString,
 		"timeAgo": timeAgo,
 		"dict":    createDict,
+		"mergeDicts": mergeDicts,
 		"default": defaultValue,
 	}
 }
 
 // minus subtracts the second number from the first
-func minus(a, b interface{}) (interface{}, error) {
+func minus(a, b any) (any, error) {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
 
@@ -61,7 +64,7 @@ func minus(a, b interface{}) (interface{}, error) {
 }
 
 // plus adds two numbers
-func plus(a, b interface{}) (interface{}, error) {
+func plus(a, b any) (any, error) {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
 
@@ -86,7 +89,7 @@ func plus(a, b interface{}) (interface{}, error) {
 }
 
 // multiply multiplies two numbers
-func multiply(a, b interface{}) (interface{}, error) {
+func multiply(a, b any) (any, error) {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
 
@@ -111,7 +114,7 @@ func multiply(a, b interface{}) (interface{}, error) {
 }
 
 // divide divides the first number by the second
-func divide(a, b interface{}) (interface{}, error) {
+func divide(a, b any) (any, error) {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
 
@@ -148,7 +151,7 @@ func divide(a, b interface{}) (interface{}, error) {
 }
 
 // modulo returns the remainder of dividing the first number by the second
-func modulo(a, b interface{}) (interface{}, error) {
+func modulo(a, b any) (any, error) {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
 
@@ -163,7 +166,7 @@ func modulo(a, b interface{}) (interface{}, error) {
 }
 
 // max returns the maximum of two numbers
-func max(a, b interface{}) interface{} {
+func max(a, b any) any {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
 
@@ -190,7 +193,7 @@ func max(a, b interface{}) interface{} {
 }
 
 // min returns the minimum of two numbers
-func min(a, b interface{}) interface{} {
+func min(a, b any) any {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
 
@@ -217,7 +220,7 @@ func min(a, b interface{}) interface{} {
 }
 
 // increment adds 1 to a number
-func increment(a interface{}) interface{} {
+func increment(a any) any {
 	av := reflect.ValueOf(a)
 
 	switch av.Kind() {
@@ -231,7 +234,7 @@ func increment(a interface{}) interface{} {
 }
 
 // decrement subtracts 1 from a number
-func decrement(a interface{}) interface{} {
+func decrement(a any) any {
 	av := reflect.ValueOf(a)
 
 	switch av.Kind() {
@@ -245,17 +248,17 @@ func decrement(a interface{}) interface{} {
 }
 
 // equal checks if two values are equal
-func equal(a, b interface{}) bool {
+func equal(a, b any) bool {
 	return reflect.DeepEqual(a, b)
 }
 
 // notEqual checks if two values are not equal
-func notEqual(a, b interface{}) bool {
+func notEqual(a, b any) bool {
 	return !reflect.DeepEqual(a, b)
 }
 
 // lessThan checks if a is less than b
-func lessThan(a, b interface{}) bool {
+func lessThan(a, b any) bool {
 	av := reflect.ValueOf(a)
 	bv := reflect.ValueOf(b)
 
@@ -280,22 +283,22 @@ func lessThan(a, b interface{}) bool {
 }
 
 // lessThanOrEqual checks if a is less than or equal to b
-func lessThanOrEqual(a, b interface{}) bool {
+func lessThanOrEqual(a, b any) bool {
 	return lessThan(a, b) || equal(a, b)
 }
 
 // greaterThan checks if a is greater than b
-func greaterThan(a, b interface{}) bool {
+func greaterThan(a, b any) bool {
 	return !lessThanOrEqual(a, b)
 }
 
 // greaterThanOrEqual checks if a is greater than or equal to b
-func greaterThanOrEqual(a, b interface{}) bool {
+func greaterThanOrEqual(a, b any) bool {
 	return !lessThan(a, b)
 }
 
 // length returns the length of a slice, array, map, or string
-func length(v interface{}) int {
+func length(v any) int {
 	if v == nil {
 		return 0
 	}
@@ -310,7 +313,7 @@ func length(v interface{}) int {
 }
 
 // toString converts a value to string
-func toString(v interface{}) string {
+func toString(v any) string {
 	if v == nil {
 		return ""
 	}
@@ -330,7 +333,7 @@ func toString(v interface{}) string {
 }
 
 // timeAgo returns a human-readable time difference from now
-func timeAgo(t interface{}) string {
+func timeAgo(t any) string {
 	var timeVal time.Time
 
 	switch v := t.(type) {
@@ -400,12 +403,12 @@ func timeAgo(t interface{}) string {
 }
 
 // createDict creates a dictionary from alternating key-value pairs
-func createDict(values ...interface{}) (map[string]interface{}, error) {
+func createDict(values ...any) (map[string]any, error) {
 	if len(values)%2 != 0 {
 		return nil, errors.New("dict: odd number of arguments")
 	}
 
-	dict := make(map[string]interface{})
+	dict := make(map[string]any)
 	for i := 0; i < len(values); i += 2 {
 		key, ok := values[i].(string)
 		if !ok {
@@ -417,8 +420,30 @@ func createDict(values ...interface{}) (map[string]interface{}, error) {
 	return dict, nil
 }
 
+// mergeDict merges two dictionaries, with values from dict2 overwriting those in dict1
+func mergeDicts(dict1 map[string]any, dict2 map[string]any) (map[string]any, error) {
+	if dict1 == nil && dict2 == nil {
+		return nil, nil
+	}
+
+	if dict1 == nil {
+		return dict2, nil
+	}
+
+	if dict2 == nil {
+		return dict1, nil
+	}
+
+	merged := make(map[string]any)
+	maps.Copy(merged, dict1)
+
+	maps.Copy(merged, dict2)
+
+	return merged, nil
+}
+
 // defaultValue returns the first value if it's not nil/empty, otherwise returns the default
-func defaultValue(value, defaultVal interface{}) interface{} {
+func defaultValue(value, defaultVal any) any {
 	if value == nil {
 		return defaultVal
 	}
@@ -448,4 +473,28 @@ func defaultValue(value, defaultVal interface{}) interface{} {
 	}
 
 	return value
+}
+
+// derefString safely dereferences a string pointer
+func derefString(v any) string {
+	if v == nil {
+		return ""
+	}
+
+	rv := reflect.ValueOf(v)
+	if rv.Kind() == reflect.Ptr {
+		if rv.IsNil() {
+			return ""
+		}
+		if rv.Elem().Kind() == reflect.String {
+			return rv.Elem().String()
+		}
+	}
+
+	// If it's already a string, return it
+	if rv.Kind() == reflect.String {
+		return rv.String()
+	}
+
+	return ""
 }

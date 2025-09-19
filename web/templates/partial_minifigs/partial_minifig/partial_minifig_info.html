@@ -1,0 +1,330 @@
+{{define "partial-minifig-info"}}
+<div class="flex gap-6">
+    <!-- Minifig Picture -->
+    <div class="flex-none w-30">
+        <div id="minifig-picture-{{.ID}}" class="w-30 h-30 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center relative">
+            {{if .BricklinkID}}
+                <div class="text-3xl text-gray-400">📷</div>
+                <div class="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white px-1 py-0.5 rounded text-xs">
+                    {{.BricklinkID}}
+                </div>
+            {{else}}
+                <div class="text-center text-gray-400">
+                    <div class="text-2xl">📦</div>
+                    <div class="text-xs">No ID</div>
+                </div>
+            {{end}}
+        </div>
+    </div>
+    
+    <!-- Minifig Information -->
+    <div class="flex-1 flex flex-col">
+        <!-- Header with Item Name and Actions -->
+        <div class="flex justify-between items-start mb-4">
+            <div class="flex-1 lg:flex lg:gap-4 mr-4">
+                <div class="flex-1 mb-4">
+                    <div class="col-span-full mb-4">
+                        <div class="m-0 text-gray-700 text-lg font-semibold">
+                            {{if .ItemName}}{{.ItemName}}{{else if .BricklinkID}}{{.BricklinkID}}{{else}}Unknown Minifig{{end}}
+                        </div>
+                    </div>
+                    
+                    <!-- Details Grid -->
+                    {{if .ReferenceID}}
+                        <div class="grid grid-cols-3 gap-4 lg:grid-cols-none lg:flex lg:gap-8 lg:items-center w-full">
+                    {{else}}
+                        <div class="grid grid-cols-2 gap-4 lg:grid-cols-none lg:flex lg:gap-8 lg:items-center w-full">
+                    {{end}}
+                    <!-- Details section -->
+                        {{if .ReferenceID}}
+                            <!-- Reference ID --> 
+                            <div class="lg:flex-none">
+                                <div class="text-xs text-gray-500 font-medium mb-1">
+                                    REFERENCE
+                                </div>
+                                <div class="text-sm text-gray-700">
+                                    {{.ReferenceID}}
+                                </div>
+                            </div>
+                        {{end}}
+                        <!-- Condition -->
+                        <div class="lg:flex-none">
+                            <div class="text-xs text-gray-500 font-medium mb-1">
+                                CONDITION
+                            </div>
+                            <div class="text-sm text-gray-700">
+                                {{if .Condition}}
+                                    {{$condStr := deref .Condition}}
+                                    {{if eq $condStr "N"}}
+                                        <span class="text-new-price-700 font-bold text-xs">New</span>
+                                    {{else if eq $condStr "U"}}
+                                        <span class="text-used-price-700 font-bold text-xs">Used</span>
+                                    {{else}}
+                                        {{$condStr}}
+                                    {{end}}
+                                {{else}}
+                                    <span class="text-gray-400">Not specified</span>
+                                {{end}}
+                            </div>
+                        </div>
+                        
+                        <!-- Created Date -->
+                        <div class="lg:flex-none">
+                            <div class="text-xs text-gray-500 font-medium mb-1">
+                                ADDED
+                            </div>
+                            <div class="text-sm text-gray-700">
+                                {{.CreatedAt.Format "Jan 2, 2006"}}
+                            </div>
+                        </div>
+                    </div> 
+                </div> 
+                <!-- Pricing Components (right side on large screens) -->
+                {{if .BricklinkID}}
+                <div class="col-span-full lg:col-span-auto lg:flex lg:gap-3 grid grid-cols-3 gap-3 mt-4 lg:mt-0 lg:justify-self-end">
+                    <!-- 6-Month Average -->
+                    <div class="w-full lg:w-32 lg:min-w-0">
+                        {{template "price-average" (dict "ItemNo" .BricklinkID)}}
+                    </div>
+                    
+                    <!-- Part-Out Value -->
+                    <div class="w-full lg:w-32 lg:min-w-0">
+                        {{template "price-partout" (dict "ItemNo" .BricklinkID)}}
+                    </div>
+                    
+                    <!-- Piece Information -->
+                    <div class="w-full lg:w-32 lg:min-w-0">
+                        {{template "price-piece-info" (dict "ItemNo" .BricklinkID)}}
+                    </div>
+                </div>
+                {{end}}
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-secondary py-1 px-2 text-xs"
+                        hx-get="/partial-minifigs-lists/{{.PartialMinifigListID}}/partial-minifig/{{.ID}}/edit" 
+                        hx-target="#modal-container" 
+                        hx-swap="innerHTML">
+                    Edit
+                </button>
+                <button class="btn bg-red-600 py-1 px-2 text-xs"
+                        hx-delete="/partial-minifigs-lists/{{.PartialMinifigListID}}/partial-minifig/{{.ID}}" 
+                        hx-target="#list-items" 
+                        hx-swap="outerHTML"
+                        hx-confirm="Are you sure you want to delete this item?">
+                    Delete
+                </button>
+            </div>
+        </div>
+        
+        <!-- Notes -->
+        {{if .Notes}}
+            <div class="mb-4">
+                <div class="text-xs text-gray-500 font-medium mb-1">
+                    NOTES
+                </div>
+                <div class="text-sm text-gray-700 bg-gray-50 p-3 rounded-md border-l-4 border-blue-500">
+                    {{.Notes}}
+                </div>
+            </div>
+        {{end}}
+    </div>
+</div>
+
+{{if .BricklinkID}}
+<script>
+// Auto-load minifig picture and pricing when card is rendered
+(function() {
+    const minifigId = '{{.BricklinkID}}';
+    const cardId = '{{.ID}}';
+    const condition = '{{if .Condition}}{{deref .Condition}}{{else}}N{{end}}';
+    
+    console.log('Initializing data loading for:', {minifigId, cardId, condition});
+    
+    if (minifigId && cardId) {
+        // Use a small delay to ensure DOM is ready
+        setTimeout(function() {
+            loadMinifigPictureForCard(minifigId, cardId);
+            loadPricingDataForCard(minifigId, condition);
+        }, 100);
+    }
+})();
+
+function loadPricingDataForCard(minifigId, condition) {
+    console.log('Loading pricing data for minifig:', minifigId, 'condition:', condition);
+    
+    // Load minifig pricing (6-month average)
+    fetch('/partial-minifigs-lists/minifig-pricing', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'bricklink_id=' + encodeURIComponent(minifigId) + '&condition=' + encodeURIComponent(condition)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Pricing data received:', data);
+        
+        if (data && data.meta && data.meta.code === 200 && data.data) {
+            const pricing = data.data;
+            
+            // Update new price
+            const newPriceElement = document.getElementById('price-new-' + minifigId);
+            if (newPriceElement && pricing.new_avg_price) {
+                newPriceElement.textContent = '$' + parseFloat(pricing.new_avg_price).toFixed(2);
+            } else if (newPriceElement) {
+                newPriceElement.textContent = 'N/A';
+            }
+            
+            // Update used price
+            const usedPriceElement = document.getElementById('price-used-' + minifigId);
+            if (usedPriceElement && pricing.used_avg_price) {
+                usedPriceElement.textContent = '$' + parseFloat(pricing.used_avg_price).toFixed(2);
+            } else if (usedPriceElement) {
+                usedPriceElement.textContent = 'N/A';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error loading pricing data:', error);
+        // Set error state for pricing elements
+        const newPriceElement = document.getElementById('price-new-' + minifigId);
+        const usedPriceElement = document.getElementById('price-used-' + minifigId);
+        if (newPriceElement) newPriceElement.textContent = 'Error';
+        if (usedPriceElement) usedPriceElement.textContent = 'Error';
+    });
+
+    // Load minifig parts data for part-out value and piece count
+    fetch('/partial-minifigs-lists/minifig-parts', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'bricklink_id=' + encodeURIComponent(minifigId)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Parts data received:', data);
+        
+        if (data && data.meta && data.meta.code === 200 && data.data) {
+            const parts = data.data;
+            let newPartOutValue = 0;
+            let usedPartOutValue = 0;
+            let newPieceCount = 0;
+            let usedPieceCount = 0;
+            
+            // Calculate part-out values and piece counts
+            parts.forEach(part => {
+                if (part.price_data) {
+                    if (part.price_data.new_avg_price) {
+                        newPartOutValue += parseFloat(part.price_data.new_avg_price) * (part.quantity || 1);
+                        newPieceCount += part.quantity || 1;
+                    }
+                    if (part.price_data.used_avg_price) {
+                        usedPartOutValue += parseFloat(part.price_data.used_avg_price) * (part.quantity || 1);
+                        usedPieceCount += part.quantity || 1;
+                    }
+                }
+            });
+            
+            // Update part-out values
+            const partoutNewElement = document.getElementById('partout-new-' + minifigId);
+            if (partoutNewElement) {
+                partoutNewElement.textContent = newPartOutValue > 0 ? '$' + newPartOutValue.toFixed(2) : 'N/A';
+            }
+            
+            const partoutUsedElement = document.getElementById('partout-used-' + minifigId);
+            if (partoutUsedElement) {
+                partoutUsedElement.textContent = usedPartOutValue > 0 ? '$' + usedPartOutValue.toFixed(2) : 'N/A';
+            }
+            
+            // Update piece counts
+            const pieceCountNewElement = document.getElementById('piece-count-new-' + minifigId);
+            if (pieceCountNewElement) {
+                pieceCountNewElement.textContent = newPieceCount > 0 ? newPieceCount.toString() : '0';
+            }
+            
+            const pieceCountUsedElement = document.getElementById('piece-count-used-' + minifigId);
+            if (pieceCountUsedElement) {
+                pieceCountUsedElement.textContent = usedPieceCount > 0 ? usedPieceCount.toString() : '0';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error loading parts data:', error);
+        // Set error state for part-out and piece count elements
+        const partoutNewElement = document.getElementById('partout-new-' + minifigId);
+        const partoutUsedElement = document.getElementById('partout-used-' + minifigId);
+        const pieceCountNewElement = document.getElementById('piece-count-new-' + minifigId);
+        const pieceCountUsedElement = document.getElementById('piece-count-used-' + minifigId);
+        
+        if (partoutNewElement) partoutNewElement.textContent = 'Error';
+        if (partoutUsedElement) partoutUsedElement.textContent = 'Error';
+        if (pieceCountNewElement) pieceCountNewElement.textContent = 'Error';
+        if (pieceCountUsedElement) pieceCountUsedElement.textContent = 'Error';
+    });
+}
+
+function loadMinifigPictureForCard(minifigId, cardId) {
+    console.log('Loading picture for card:', cardId, 'minifig:', minifigId);
+    
+    const pictureContainer = document.getElementById('minifig-picture-' + cardId);
+    if (!pictureContainer) {
+        console.error('Picture container not found for card:', cardId);
+        return;
+    }
+    
+    fetch('/partial-minifigs-lists/minifig-picture', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'bricklink_id=' + encodeURIComponent(minifigId)
+    })
+    .then(response => {
+        console.log('Picture API response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Picture API response for card:', data);
+        
+        if (data && data.meta && data.meta.code === 200 && data.data) {
+            const firstImage = data.data;
+            const imageUrl = firstImage.thumbnail_url || firstImage.url;
+            if (imageUrl) {
+                pictureContainer.innerHTML = '<img src="' + imageUrl + '" alt="Minifig ' + minifigId + '" class="max-w-full max-h-full object-contain rounded-lg"><div class="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white px-1 py-0.5 rounded text-xs">' + minifigId + '</div>';
+                pictureContainer.className = pictureContainer.className.replace('flex items-center justify-center relative', '') + ' flex items-center justify-center relative';
+            }
+        } else {
+            console.log('Picture API failed for card:', cardId, data && data.meta ? data.meta.message : 'Unknown error');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading picture for card:', cardId, error);
+    });
+}
+
+function togglePartsForMinifig(minifigId) {
+    const partsList = document.getElementById('parts-list-' + minifigId);
+    const toggleText = document.getElementById('parts-toggle-' + minifigId);
+    
+    // Check if element is hidden using the 'hidden' class or inline style
+    const isHidden = partsList.classList.contains('hidden') || 
+                     partsList.style.display === 'none' || 
+                     getComputedStyle(partsList).display === 'none';
+    
+    if (isHidden) {
+        partsList.classList.remove('hidden');
+        partsList.style.display = 'block';
+        toggleText.textContent = 'Hide Parts';
+    } else {
+        partsList.classList.add('hidden');
+        partsList.style.display = 'none';
+        toggleText.textContent = 'Show Parts';
+    }
+}
+</script>
+{{end}}
+{{end}}

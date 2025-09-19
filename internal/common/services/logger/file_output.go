@@ -98,10 +98,48 @@ func (f *FileOutput) writeJSON(entry LogEntry) error {
 		Level:     entry.Level.String(),
 		Message:   entry.Message,
 		Source:    entry.Source,
-		Fields:    entry.Fields,
+		Fields:    sanitizeFields(entry.Fields),
 	}
 
 	return f.encoder.Encode(jsonEntry)
+}
+
+// sanitizeFields removes non-serializable values from fields map
+func sanitizeFields(fields map[string]interface{}) map[string]interface{} {
+	if fields == nil {
+		return nil
+	}
+	
+	sanitized := make(map[string]interface{})
+	for key, value := range fields {
+		if isSerializable(value) {
+			sanitized[key] = value
+		} else {
+			// Convert non-serializable values to their string representation
+			sanitized[key] = fmt.Sprintf("%T", value)
+		}
+	}
+	return sanitized
+}
+
+// isSerializable checks if a value can be JSON serialized
+func isSerializable(value interface{}) bool {
+	switch value.(type) {
+	case nil, bool, int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, string:
+		return true
+	case []interface{}, map[string]interface{}:
+		return true
+	default:
+		// Try to detect functions and other non-serializable types
+		valueStr := fmt.Sprintf("%T", value)
+		if valueStr == "func()" || 
+		   len(valueStr) > 4 && valueStr[:4] == "func" ||
+		   valueStr == "context.Context" ||
+		   valueStr == "*sync.Mutex" {
+			return false
+		}
+		return true
+	}
 }
 
 // writeText writes the log entry as formatted text

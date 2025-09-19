@@ -61,12 +61,12 @@ function loadMinifigPicture(itemId) {
     
     console.log('Picture container found:', pictureContainer);
     
+    const formData = new FormData();
+    formData.append('bricklink_id', itemId);
+    
     fetch('/partial-minifigs-lists/minifig-picture', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'bricklink_id=' + encodeURIComponent(itemId)
+        body: formData
     })
     .then(response => {
         console.log('Picture API response status:', response.status);
@@ -129,12 +129,13 @@ function loadMinifigPricing(itemId) {
  * Load pricing for specific condition
  */
 function loadMinifigPricingByCondition(itemId, condition) {
+    const formData = new FormData();
+    formData.append('bricklink_id', itemId);
+    formData.append('condition', condition);
+    
     return fetch('/partial-minifigs-lists/minifig-pricing', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'bricklink_id=' + encodeURIComponent(itemId) + '&condition=' + encodeURIComponent(condition)
+        body: formData
     })
     .then(response => response.json())
     .then(data => {
@@ -212,12 +213,12 @@ function updatePieceInfoDisplay(itemId, newCount, usedCount) {
 function loadMinifigParts(itemId) {
     console.log('Loading parts for:', itemId);
     
+    const formData = new FormData();
+    formData.append('bricklink_id', itemId);
+    
     fetch('/partial-minifigs-lists/minifig-parts', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'bricklink_id=' + encodeURIComponent(itemId)
+        body: formData
     })
     .then(response => response.json())
     .then(data => {
@@ -356,15 +357,15 @@ function loadPartOutPricing(itemId, itemType, partNo, colorId, quantity) {
  * Load individual part pricing by condition
  */
 function loadPartPricingByCondition(partId, itemType, partNo, colorId, condition) {
+    const formData = new FormData();
+    formData.append('item_type', itemType);
+    formData.append('item_id', partNo);
+    formData.append('color_id', colorId);
+    formData.append('condition', condition);
+    
     return fetch('/partial-minifigs-lists/part-pricing', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'item_type=' + encodeURIComponent(itemType) + 
-              '&item_id=' + encodeURIComponent(partNo) + 
-              '&color_id=' + encodeURIComponent(colorId) + 
-              '&condition=' + encodeURIComponent(condition)
+        body: formData
     })
     .then(response => response.json())
     .then(data => {
@@ -466,9 +467,14 @@ function addMinifigAndParts(itemId, parts = null) {
     
     console.log('Preparing to show minifig details modal for:', itemId);
     
+    // Get the minifig name from the hidden field
+    const itemNameField = document.getElementById('item-name-' + itemId);
+    const minifigName = itemNameField ? itemNameField.value : '';
+    
     // Store minifig data for modal use
     window.currentMinifigData = {
         itemId: itemId,
+        itemName: minifigName,
         listId: listId,
         selectedParts: []
     };
@@ -499,7 +505,7 @@ function showMinifigDetailsModal(parts = null) {
     }
     
     // Make HTMX request to load modal
-    const url = '/partial-minifigs-lists/minifig-details-modal';
+    const url = '/partial-minifigs-lists/add-minifig-details-modal';
     const formData = new FormData();
     formData.append('item_id', minifigData.itemId);
     formData.append('list_id', minifigData.listId);
@@ -519,6 +525,9 @@ function showMinifigDetailsModal(parts = null) {
         // If parts weren't provided, load them via API
         if (!parts) {
             populateModalPartsList();
+        } else {
+            // Initialize part images and pricing for parts that were provided
+            initializeModalParts();
         }
     })
     .catch(error => {
@@ -590,17 +599,39 @@ function showFallbackModal() {
 // Modal parts population is now handled by server-side templates
 
 /**
+ * Initialize all modal parts (load images and pricing)
+ */
+function initializeModalParts() {
+    const partCards = document.querySelectorAll('.modal-part-card');
+    
+    partCards.forEach((card, index) => {
+        const partId = card.id.replace('-card', '');
+        const itemType = card.dataset.itemType;
+        const partNo = card.dataset.partNo;
+        const colorId = card.dataset.colorId;
+        const quantity = card.dataset.quantity;
+        const itemId = card.dataset.itemId;
+        
+        // Add a small delay between requests to avoid overwhelming the server
+        setTimeout(() => {
+            loadPartImage(partId, itemType, partNo, colorId);
+            loadPartPricing(partId, itemType, partNo, colorId, quantity, itemId);
+        }, index * 100);
+    });
+}
+
+/**
  * Load part image
  */
 function loadPartImage(partId, itemType, partNo, colorId) {
+    const formData = new FormData();
+    formData.append('item_type', itemType);
+    formData.append('item_id', partNo);
+    formData.append('color_id', colorId);
+    
     fetch('/partial-minifigs-lists/part-picture', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'item_type=' + encodeURIComponent(itemType) + 
-              '&item_id=' + encodeURIComponent(partNo) + 
-              '&color_id=' + encodeURIComponent(colorId)
+        body: formData
     })
     .then(response => response.json())
     .then(data => {
@@ -656,18 +687,19 @@ function populateModalPartsList() {
     // Check if parts are already rendered
     const existingParts = document.querySelectorAll('.modal-part-card');
     if (existingParts.length > 0) {
-        console.log('Parts already rendered in modal, skipping API call');
+        console.log('Parts already rendered in modal, initializing them');
+        initializeModalParts();
         return;
     }
     
     const itemId = minifigData.itemId;
     
+    const formData = new FormData();
+    formData.append('bricklink_id', itemId);
+    
     fetch('/partial-minifigs-lists/minifig-parts', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'bricklink_id=' + encodeURIComponent(itemId)
+        body: formData
     })
     .then(response => response.json())
     .then(data => {
@@ -802,7 +834,7 @@ function updateModalSelectAllButtonText() {
 function submitMinifigDetails(event) {
     event.preventDefault();
     
-    const form = event.target;
+    const form = document.getElementById('add-minifig-details-form');
     const formData = new FormData(form);
     const minifigData = window.currentMinifigData;
     
@@ -811,16 +843,18 @@ function submitMinifigDetails(event) {
         return false;
     }
     
-    // Collect selected parts
-    const selectedCards = document.querySelectorAll('.modal-part-card.selected');
-    const selectedParts = Array.from(selectedCards).map(card => ({
-        PartNo: card.dataset.partNo,
-        PartName: card.dataset.partName,
-        Quantity: parseInt(card.dataset.quantity),
-        ColorId: parseInt(card.dataset.colorId),
-        ItemType: card.dataset.itemType,
-        condition: formData.get('condition') || ''
-    }));
+    // Collect unselected parts (parts that are NOT selected)
+    const allPartCards = document.querySelectorAll('.modal-part-card');
+    const unselectedParts = Array.from(allPartCards)
+        .filter(card => !card.classList.contains('selected'))
+        .map(card => ({
+            PartNo: card.dataset.partNo,
+            PartName: card.dataset.partName,
+            Quantity: parseInt(card.dataset.quantity),
+            ColorId: parseInt(card.dataset.colorId),
+            ItemType: card.dataset.itemType,
+            condition: formData.get('condition') || ''
+        }));
     
     const referenceId = formData.get('reference_id') || '';
     const condition = formData.get('condition') || '';
@@ -831,7 +865,7 @@ function submitMinifigDetails(event) {
         referenceId: referenceId,
         condition: condition,
         notes: notes,
-        selectedParts: selectedParts
+        unselectedParts: unselectedParts
     });
     
     closeMinifigDetailsModal();
@@ -844,39 +878,36 @@ function submitMinifigDetails(event) {
     }
     
     // Submit to server
+    const submitFormData = new FormData();
+    submitFormData.append('list_id', minifigData.listId);
+    submitFormData.append('minifig_id', minifigData.itemId);
+    submitFormData.append('minifig_name', minifigData.itemName || '');
+    submitFormData.append('reference_id', referenceId);
+    submitFormData.append('condition', condition);
+    submitFormData.append('notes', notes);
+    submitFormData.append('selected_parts', JSON.stringify(unselectedParts));
+    
     fetch('/partial-minifigs-lists/add-minifig-with-parts', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'list_id=' + encodeURIComponent(minifigData.listId) +
-              '&minifig_id=' + encodeURIComponent(minifigData.itemId) +
-              '&reference_id=' + encodeURIComponent(referenceId) +
-              '&condition=' + encodeURIComponent(condition) +
-              '&notes=' + encodeURIComponent(notes) +
-              '&selected_parts=' + encodeURIComponent(JSON.stringify(selectedParts))
+        body: submitFormData
     })
     .then(response => {
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        return response.text();
-    })
-    .then(html => {
         console.log('Successfully added minifig and parts');
         
-        // Update the list
-        const listItemsSection = document.querySelector('[data-section="list-items"]');
-        if (listItemsSection) {
-            listItemsSection.innerHTML = html;
+        // Close the search modal (if it exists)
+        const searchModal = document.getElementById('new-minifig-modal');
+        if (searchModal) {
+            searchModal.remove();
         }
         
         // Show success message
-        if (typeof showNotification === 'function') {
-            showNotification('Successfully added ' + minifigData.itemId + ' with ' + selectedParts.length + ' parts!', 'success');
-        } else {
-            alert('Successfully added ' + minifigData.itemId + ' with ' + selectedParts.length + ' parts!');
-        }
+        alert('Successfully added ' + minifigData.itemId + ' with ' + unselectedParts.length + ' missing parts!');
+        
+        // Refresh just the current list view instead of full page reload
+        refreshCurrentListView(minifigData.listId);
     })
     .catch(error => {
         console.error('Error adding minifig and parts:', error);
@@ -893,14 +924,51 @@ function submitMinifigDetails(event) {
     return false;
 }
 
-// Utility functions
-function showNotification(message, type) {
-    if (typeof window.showNotification === 'function') {
-        window.showNotification(message, type);
-    } else {
-        alert(message);
+/**
+ * Refresh the current list view without full page reload
+ */
+function refreshCurrentListView(listId) {
+    if (!listId) {
+        console.error('No list ID provided for refresh');
+        window.location.reload(); // Fallback to full page reload
+        return;
     }
+    
+    console.log('Refreshing list view for list ID:', listId);
+    
+    // Make HTMX-style request to get updated list content
+    fetch('/partial-minifigs-lists/' + listId, {
+        method: 'GET',
+        headers: {
+            'HX-Request': 'true'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.text();
+    })
+    .then(html => {
+        // Find the main content container and update it
+        const contentContainer = document.querySelector('main');
+        
+        if (contentContainer) {
+            contentContainer.innerHTML = html;
+            console.log('Successfully refreshed list view');
+        } else {
+            console.error('Could not find main content container, falling back to full page reload');
+            window.location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error refreshing list view:', error);
+        // Fallback to full page reload if HTMX refresh fails
+        window.location.reload();
+    });
 }
+
+// Utility functions
 
 function showErrorMessage(itemId, message) {
     const errorElement = document.getElementById('error-message-' + itemId);

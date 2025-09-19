@@ -149,11 +149,14 @@ func (repo *PartialMinifigRepository) GetPartialMinifigParts(partialMinifigID in
 		pmp.cost_per_piece, 
 		i.bricklink_id,
 		ib.name as part_name,
+		c.name as color_name,
+		c.code as color_code,
 		pmp.created_at, 
 		pmp.updated_at 
 	FROM partial_minifig_parts pmp
 	LEFT JOIN items i ON pmp.item_id = i.id
 	LEFT JOIN items_bricklink ib ON i.bricklink_id = ib.id
+	LEFT JOIN colors c ON pmp.color_id = c.bricklink_id
 	WHERE pmp.partial_minifig_id = $1 
 	ORDER BY pmp.created_at ASC;`
 
@@ -209,20 +212,36 @@ func (repo *PartialMinifigRepository) UpdatePartialMinifigList(id int64, name, d
 }
 
 // CreatePartialMinifigWithParts creates a new partial minifig with its associated parts
-func (repo *PartialMinifigRepository) CreatePartialMinifigWithParts(listID int64, minifigID string, referenceID *string, condition *string, notes *string, selectedParts []SelectedPart, userID int64) (*PartialMinifig, error) {
+func (repo *PartialMinifigRepository) CreatePartialMinifigWithParts(listID int64, minifigID string, minifigName string, referenceID *string, condition *string, notes *string, selectedParts []SelectedPart, userID int64) (*PartialMinifig, error) {
 	logger.Info("Repository: Starting CreatePartialMinifigWithParts", "list_id", listID, "minifig_id", minifigID, "parts_count", len(selectedParts), "user_id", userID)
 
 	// First, find or create an items record for the minifig
-	itemID, err := repo.FindOrCreateItem(minifigID)
+	itemID, err := repo.FindOrCreateItem(minifigID, minifigName)
 	if err != nil {
 		logger.Error("Repository: Failed to find or create item", "minifig_id", minifigID, "error", err)
 		return nil, err
 	}
 
 	// Now create the partial minifig entry
-	sql := `INSERT INTO partial_minifigs (reference_id, condition, notes, partial_minifig_list_id, item_id, created_at) 
-			VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP) 
-			RETURNING id, reference_id, condition, notes, partial_minifig_list_id, item_id, created_at, updated_at;`
+	sql := `WITH inserted AS (
+		INSERT INTO partial_minifigs (reference_id, condition, notes, partial_minifig_list_id, item_id, created_at) 
+		VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP) 
+		RETURNING id, reference_id, condition, notes, partial_minifig_list_id, item_id, created_at, updated_at
+	)
+	SELECT 
+		i.id, 
+		i.reference_id, 
+		i.condition, 
+		i.notes, 
+		i.partial_minifig_list_id, 
+		i.item_id,
+		items.bricklink_id,
+		ib.name as item_name,
+		i.created_at, 
+		i.updated_at
+	FROM inserted i
+	LEFT JOIN items ON i.item_id = items.id
+	LEFT JOIN items_bricklink ib ON items.bricklink_id = ib.id;`
 
 	partialMinifig, err := db.QueryRowToStructFromService[PartialMinifig](repo.db, sql, referenceID, condition, notes, listID, itemID)
 	if err != nil {
@@ -249,7 +268,7 @@ func (repo *PartialMinifigRepository) CreatePartialMinifigWithParts(listID int64
 // CreatePartialMinifigPart creates a single part entry for a partial minifig
 func (repo *PartialMinifigRepository) CreatePartialMinifigPart(partialMinifigID int64, part SelectedPart) error {
 	// First, find or create an item for this part
-	itemID, err := repo.FindOrCreateItem(part.PartNo)
+	itemID, err := repo.FindOrCreateItem(part.PartNo, part.PartName)
 	if err != nil {
 		logger.Error("Repository: Failed to find or create item for part", "part_no", part.PartNo, "error", err)
 		return err
@@ -288,7 +307,7 @@ func (repo *PartialMinifigRepository) CreatePartialMinifigPart(partialMinifigID 
 }
 
 // FindOrCreateBricklinkItem finds an existing BrickLink item or creates a new one with minimal data
-func (repo *PartialMinifigRepository) FindOrCreateBricklinkItem(bricklinkID string) error {
+func (repo *PartialMinifigRepository) FindOrCreateBricklinkItem(bricklinkID string, itemName string) error {
 	logger.Info("Repository: Finding or creating BrickLink item", "bricklink_id", bricklinkID)
 
 	// First, check if the item already exists in items_bricklink
@@ -309,8 +328,11 @@ func (repo *PartialMinifigRepository) FindOrCreateBricklinkItem(bricklinkID stri
 	createSQL := `INSERT INTO items_bricklink (id, name, type, created_at) 
 				  VALUES ($1, $2, $3, CURRENT_TIMESTAMP);`
 
-	// Use generic values since we don't have the actual item data yet
-	name := "Unknown Item " + bricklinkID
+	// Use actual name if provided, otherwise use placeholder
+	name := itemName
+	if name == "" {
+		name = "Unknown Item " + bricklinkID
+	}
 	itemType := "PART" // Default type
 
 	_, err = repo.db.ExecSQL(createSQL, bricklinkID, name, itemType)
@@ -324,7 +346,7 @@ func (repo *PartialMinifigRepository) FindOrCreateBricklinkItem(bricklinkID stri
 }
 
 // FindOrCreateItem finds an existing item by BrickLink ID or creates a new one
-func (repo *PartialMinifigRepository) FindOrCreateItem(bricklinkID string) (int64, error) {
+func (repo *PartialMinifigRepository) FindOrCreateItem(bricklinkID string, itemName string) (int64, error) {
 	logger.Info("Repository: Finding or creating item", "bricklink_id", bricklinkID)
 
 	// First, try to find an existing item using CollectRowsToMap
@@ -346,7 +368,7 @@ func (repo *PartialMinifigRepository) FindOrCreateItem(bricklinkID string) (int6
 	}
 
 	// If not found, ensure the BrickLink item exists first (for FK constraint)
-	err = repo.FindOrCreateBricklinkItem(bricklinkID)
+	err = repo.FindOrCreateBricklinkItem(bricklinkID, itemName)
 	if err != nil {
 		logger.Error("Repository: Failed to find or create BrickLink item", "bricklink_id", bricklinkID, "error", err)
 		return 0, err

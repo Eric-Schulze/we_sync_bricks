@@ -167,6 +167,70 @@ body {
    Form Components
    ========================================================================== */
 
+/* Generic input field styling */
+.form-input {
+    @apply block w-full rounded-md border border-gray-300 py-2 pl-3 pr-3 text-sm bg-white;
+    @apply focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500;
+}
+
+/* Input with search icon (left padding for icon) */
+.form-input-search {
+    @apply block w-full rounded-md border border-gray-300 py-2 pl-8 pr-3 text-sm bg-white;
+    @apply focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500;
+    @apply leading-5 placeholder-gray-500 focus:placeholder-gray-400;
+}
+
+/* Select dropdown styling */
+.form-select {
+    @apply block w-full rounded-md border border-gray-300 py-2 pl-3 pr-10 text-sm bg-white;
+    @apply focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500;
+}
+
+/* Date input styling - ensures consistent text color and opacity */
+input[type="date"] {
+    @apply text-gray-900 !important;
+    color-scheme: light !important;
+    opacity: 1 !important;
+}
+
+/* More specific date input styling */
+.form-input[type="date"],
+input[type="date"].form-input {
+    @apply text-gray-900 !important;
+    color-scheme: light !important;
+    opacity: 1 !important;
+}
+
+/* Fix date input placeholder/empty state styling */
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+    @apply text-gray-900 !important;
+    opacity: 1 !important;
+    color: rgb(17 24 39) !important; /* gray-900 equivalent */
+}
+
+/* ==========================================================================
+   Button Components (Enhanced)
+   ========================================================================== */
+
+/* Primary button styling */
+.btn-primary {
+    @apply inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md;
+    @apply text-white bg-indigo-600 hover:bg-indigo-700;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+}
+
+/* Secondary button styling */
+.btn-secondary {
+    @apply inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md;
+    @apply text-gray-700 bg-white hover:bg-gray-50;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+}
+
 .form-group {
     margin-bottom: 1rem;
 }
@@ -296,6 +360,15 @@ body {
 }
 
 /* ==========================================================================
+   Page Heading Components
+   ========================================================================== */
+
+/* Modern responsive page heading */
+.page-heading {
+  @apply text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight lg:text-4xl;
+}
+
+/* ==========================================================================
    Custom Icons with @apply
    ========================================================================== */
 
@@ -320,3 +393,97 @@ body {
 .plus-icon-md { @apply w-4 h-4; }
 .plus-icon-lg { @apply w-5 h-5; }
 .plus-icon-xl { @apply w-6 h-6; }
+
+/* ==========================================================================
+   HTMX Loading States
+   ========================================================================== */
+
+/* HTMX indicator - hidden by default, shown during requests */
+.htmx-indicator {
+    @apply hidden;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+    @apply block;
+}
+
+/* Fade transition for smooth loading */
+.htmx-settling {
+    @apply opacity-0;
+}
+
+.htmx-swapping {
+    @apply opacity-0;
+}
+
+/* ==========================================================================
+   Sortable Table Headers
+   ========================================================================== */
+
+/* Base sortable header styles */
+.sortable {
+    @apply cursor-pointer hover:bg-gray-100 transition-colors duration-150 ease-in-out;
+}
+
+/* Active sort state */
+.sorted-asc,
+.sorted-desc {
+    @apply bg-gray-100 text-gray-900 font-semibold;
+}
+
+/* Hover states for sortable headers */
+.sortable:hover {
+    @apply bg-gray-50;
+}
+
+.sortable:focus {
+    @apply outline-none ring-2 ring-blue-500 ring-inset;
+}
+
+/* Sort indicator transitions */
+.sortable span {
+    @apply transition-all duration-200 ease-in-out;
+}
+
+/* Active sort indicators */
+.sorted-asc span,
+.sorted-desc span {
+    @apply text-blue-600;
+}
+
+/* Performance optimization - reduce repaints during sorting */
+.sortable * {
+    @apply will-change-transform;
+}
+
+/* ==========================================================================
+   Table Column Header Components
+   ========================================================================== */
+
+/* Base column header button styling */
+.column-header {
+    @apply inline-flex items-center hover:text-gray-900 cursor-pointer transition-colors duration-150 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+/* Static column header styling (non-sortable) */
+.column-header-static {
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+/* Sort indicator container */
+.column-header .sort-indicator {
+    @apply ml-2 flex-none rounded text-gray-400 invisible group-hover:visible transition-all duration-200;
+}
+
+/* Show indicator when column is actively sorted */
+.column-header.sorted-asc .sort-indicator,
+.column-header.sorted-desc .sort-indicator {
+    @apply visible text-blue-600;
+}
+
+/* Active sort state styling */
+.column-header.sorted-asc,
+.column-header.sorted-desc {
+    @apply text-blue-600 font-medium;
+}

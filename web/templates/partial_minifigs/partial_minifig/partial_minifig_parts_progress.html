@@ -1,0 +1,51 @@
+{{define "partial-minifig-parts-progress"}}
+<!-- Parts Summary - Full Width -->
+<div class="mt-4 pt-4 border-t border-gray-200 w-full">
+    <div class="text-xs text-gray-500 font-medium mb-3">
+        PARTS PROGRESS
+    </div>
+    <div class="flex items-center justify-between w-full">
+        {{if .Parts}}
+            {{$totalParts := 0}}
+            {{$totalNeeded := 0}}
+            {{$totalCollected := 0}}
+            {{range .Parts}}
+                {{$totalParts = plus $totalParts 1}}
+                {{$totalNeeded = plus $totalNeeded .QuantityNeeded}}
+                {{$totalCollected = plus $totalCollected .QuantityCollected}}
+            {{end}}
+            {{$percentage := 0}}
+            {{if gt $totalNeeded 0}}
+                {{$percentage = div (mul $totalCollected 100) $totalNeeded}}
+            {{end}}
+            
+            <div class="flex items-center gap-4 flex-1 pr-6">
+                <div class="flex flex-col gap-1">
+                    <div class="text-sm text-gray-700 font-medium">
+                        {{$totalCollected}}/{{$totalNeeded}} pieces ({{$percentage}}%)
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        {{$totalParts}} unique parts
+                    </div>
+                </div>
+                
+                <!-- Progress Bar - Wider -->
+                <div class="flex-1 max-w">
+                    <div class="bg-gray-200 h-2 rounded overflow-hidden">
+                        <div class="h-full transition-all duration-300 {{if eq $percentage 100}}bg-green-500{{else}}bg-blue-500{{end}}" style="width: {{$percentage}}%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="bg-gray-100 border border-gray-300 py-1 px-2 rounded text-xs text-gray-500 cursor-pointer"
+                    onclick="togglePartsForMinifig({{.ID}})">
+                <span id="parts-toggle-{{.ID}}">Show Parts</span>
+            </button>
+        {{else}}
+            <div class="text-sm text-gray-400">
+                Parts not loaded
+            </div>
+        {{end}}
+    </div>
+</div>
+{{end}}

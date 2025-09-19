@@ -24,4 +24,12 @@ func (handler *ProfileHandler) RegisterRoutes(router chi.Router) {
 		r.Post("/api-keys", handler.HandleUpdateAPIKeys())
 		r.Delete("/api-keys", handler.HandleDeleteAPIKeys())
 	})
+
+	// Account Settings routes (require authentication)
+	router.Route("/account-settings", func(r chi.Router) {
+		// Add auth middleware to protect all account settings routes
+		r.Use(auth.Middleware(handler.jwtSecret))
+
+		r.Get("/", handler.HandleAccountSettingsPage())
+	})
 }

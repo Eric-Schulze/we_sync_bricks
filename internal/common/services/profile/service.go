@@ -191,9 +191,9 @@ func (s *ProfileService) DeleteAPICredentials(userID int64, provider string) err
 }
 
 // InitializeProfileHandler creates a fully initialized profile handler with all dependencies
-func InitializeProfileHandler(dbService models.DBService, templates *template.Template, jwtSecret []byte) *ProfileHandler {
+func InitializeProfileHandler(dbService models.DBService, templates *template.Template, jwtSecret []byte, appConfig *models.AppConfig) *ProfileHandler {
 	repo := NewProfileRepository(dbService)
 	service := NewProfileService(repo)
-	handler := NewProfileHandler(service, templates, jwtSecret)
+	handler := NewProfileHandler(service, templates, jwtSecret, appConfig)
 	return handler
 }

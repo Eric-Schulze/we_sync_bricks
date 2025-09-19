@@ -13,7 +13,8 @@ import (
 type LogLevel int
 
 const (
-	LogDebug LogLevel = iota
+	LogVerbose LogLevel = iota
+	LogDebug
 	LogInfo
 	LogWarn
 	LogError
@@ -23,7 +24,7 @@ const (
 type LogEntry struct {
 	Level     LogLevel
 	Message   string
-	Fields    map[string]interface{}
+	Fields    map[string]any
 	Timestamp time.Time
 	Source    string
 }
@@ -111,6 +112,11 @@ func (l *Logger) log(level LogLevel, message string, fields ...interface{}) {
 	}
 }
 
+// Verbose logs a verbose message
+func (l *Logger) Verbose(message string, fields ...interface{}) {
+	l.log(LogVerbose, message, fields...)
+}
+
 // Debug logs a debug message
 func (l *Logger) Debug(message string, fields ...interface{}) {
 	l.log(LogDebug, message, fields...)
@@ -151,6 +157,8 @@ func getCallerInfo() string {
 // String returns the string representation of LogLevel
 func (l LogLevel) String() string {
 	switch l {
+	case LogVerbose:
+		return "VERBOSE"
 	case LogDebug:
 		return "DEBUG"
 	case LogInfo:
@@ -193,6 +201,12 @@ func InitializeDefaultLogger(logLevel LogLevel, logFilePath string) error {
 }
 
 // Package-level logging functions that use the default logger
+func Verbose(message string, fields ...interface{}) {
+	if defaultLogger != nil {
+		defaultLogger.Verbose(message, fields...)
+	}
+}
+
 func Debug(message string, fields ...interface{}) {
 	if defaultLogger != nil {
 		defaultLogger.Debug(message, fields...)
@@ -252,8 +266,10 @@ func (h *slogHandler) Handle(ctx context.Context, record slog.Record) error {
 		logLevel = LogWarn
 	case record.Level >= slog.LevelInfo:
 		logLevel = LogInfo
-	default:
+	case record.Level >= slog.LevelDebug:
 		logLevel = LogDebug
+	default:
+		logLevel = LogVerbose
 	}
 
 	fields := make([]interface{}, 0)

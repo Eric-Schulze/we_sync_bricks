@@ -7,20 +7,23 @@ import (
 	"github.com/eric-schulze/we_sync_bricks/internal/common/models"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/auth"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/logger"
+	"github.com/eric-schulze/we_sync_bricks/webhooks"
 )
 
 type ProfileHandler struct {
 	service   *ProfileService
 	templates *template.Template
 	jwtSecret []byte
+	appConfig *models.AppConfig
 }
 
 // NewProfileHandler creates a new profile handler
-func NewProfileHandler(service *ProfileService, templates *template.Template, jwtSecret []byte) *ProfileHandler {
+func NewProfileHandler(service *ProfileService, templates *template.Template, jwtSecret []byte, appConfig *models.AppConfig) *ProfileHandler {
 	return &ProfileHandler{
 		service:   service,
 		templates: templates,
 		jwtSecret: jwtSecret,
+		appConfig: appConfig,
 	}
 }
 
@@ -308,6 +311,48 @@ func (h *ProfileHandler) HandleDeleteAPIKeys() http.HandlerFunc {
 			w.Write([]byte(`<div class="success-message" style="color: green; padding: 10px; border: 1px solid green; border-radius: 4px; margin: 10px 0;">` + provider + ` API credentials deleted successfully!</div>`))
 		} else {
 			http.Redirect(w, r, "/profile", http.StatusSeeOther)
+		}
+	}
+}
+
+// HandleAccountSettingsPage displays the account settings page
+func (h *ProfileHandler) HandleAccountSettingsPage() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Get current user from context (set by auth middleware)
+		user, ok := r.Context().Value(auth.UserContextKey).(*models.User)
+		if !ok {
+			http.Redirect(w, r, "/auth/login", http.StatusSeeOther)
+			return
+		}
+
+		// Generate webhook URL for this user
+		baseURL := h.appConfig.AppSettings.BaseURL
+		if baseURL == "" {
+			baseURL = "https://your-app-domain.com" // Default fallback
+		}
+		webhookURL := webhooks.GenerateWebhookURL(baseURL, int(user.ID))
+
+		data := map[string]interface{}{
+			"Title":       "Account Settings",
+			"CurrentPage": "account-settings",
+			"User":        user,
+			"WebhookURL":  webhookURL,
+			"BaseURL":     baseURL,
+		}
+
+		logger.Info("Handling request to Account Settings page", "user_id", user.ID)
+
+		// Check if this is an HTMX request
+		if r.Header.Get("HX-Request") == "true" {
+			if err := h.templates.ExecuteTemplate(w, "account-settings-content", data); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			if err := h.templates.ExecuteTemplate(w, "account-settings", data); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 }

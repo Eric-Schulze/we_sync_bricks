@@ -2,6 +2,7 @@ package partial_minifigs
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -31,21 +32,27 @@ func (handler *PartialMinifigHandler) HandlePartialMinifigListsPage() http.Handl
 	// Use this closure to prepare any objects needed for the handler
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
+			logger.Debug("Starting HandlePartialMinifigListsPage request", "method", r.Method, "url", r.URL.String(), "remote_addr", r.RemoteAddr)
+
 			// Get current user from context (set by auth middleware)
 			user, ok := r.Context().Value(auth.UserContextKey).(*models.User)
 			if !ok {
+				logger.Error("User not found in context - authentication failed", "context_keys", r.Context())
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
 
-			logger.Info("Handling request to Partial Minifig List", "user_id", user.ID, "email", user.Email)
+			logger.Debug("User authenticated successfully", "user_id", user.ID, "email", user.Email)
 
+			logger.Debug("Calling service to get all partial minifig lists", "user_id", user.ID)
 			lists, err := handler.service.GetAllPartialMinifigLists(user)
 			if err != nil {
-				logger.Error("Error getting lists", "user_id", user.ID, "error", err)
+				logger.Error("Service error when getting lists", "user_id", user.ID, "error", err, "error_type", fmt.Sprintf("%T", err))
 				http.Error(w, "Error loading lists", http.StatusInternalServerError)
 				return
 			}
+
+			logger.Debug("Successfully retrieved lists from service", "user_id", user.ID, "list_count", len(lists))
 
 			data := map[string]interface{}{
 				"Title":       "Partial Minifigs Lists",
@@ -54,44 +61,69 @@ func (handler *PartialMinifigHandler) HandlePartialMinifigListsPage() http.Handl
 				"User":        user,
 			}
 
+			logger.Debug("Template data prepared", "user_id", user.ID, "data_keys", getMapKeys(data))
+
 			// Check if this is an HTMX request
-			if r.Header.Get("HX-Request") == "true" {
+			isHTMX := r.Header.Get("HX-Request") == "true"
+			logger.Debug("Request type determined", "user_id", user.ID, "is_htmx", isHTMX)
+
+			if isHTMX {
+				logger.Debug("Executing HTMX template", "user_id", user.ID, "template", "partial-minifigs-lists-content")
 				if err := handler.templates.ExecuteTemplate(w, "partial-minifigs-lists-content", data); err != nil {
+					logger.Error("Template execution error for HTMX request", "user_id", user.ID, "template", "partial-minifigs-lists-content", "error_message", err.Error(), "error_type", fmt.Sprintf("%T", err))
 					http.Error(w, err.Error(), http.StatusInternalServerError)
+				} else {
+					logger.Debug("HTMX template executed successfully", "user_id", user.ID)
 				}
 				return
 			}
 
 			// If not an HTMX request, render the full page
-			if err := handler.templates.ExecuteTemplate(w, "partial-minifigs-lists-page", data); err != nil {
+			logger.Debug("Executing full page template", "user_id", user.ID, "template", "partial_minifig_lists")
+			if err := handler.templates.ExecuteTemplate(w, "partial_minifig_lists", data); err != nil {
+				logger.Error("Template execution error for full page request", "user_id", user.ID, "template", "partial_minifig_lists", "error_message", err.Error(), "error_type", fmt.Sprintf("%T", err))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
+
+			logger.Debug("Full page template executed successfully", "user_id", user.ID)
 		},
 	)
 }
 
 func (handler *PartialMinifigHandler) HandlePartialMinifigListDetail() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		logger.Debug("Starting HandlePartialMinifigListDetail request", "method", r.Method, "url", r.URL.String(), "remote_addr", r.RemoteAddr)
+
 		// Get current user from context (set by auth middleware)
 		user, ok := r.Context().Value(auth.UserContextKey).(*models.User)
 		if !ok {
+			logger.Error("User not found in context - authentication failed for list detail", "context_keys", r.Context())
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
+		logger.Debug("User authenticated successfully for list detail", "user_id", user.ID, "email", user.Email)
+
 		vars := chi.URLParam(r, "id")
+		logger.Debug("Extracting list ID from URL params", "user_id", user.ID, "id_param", vars)
+
 		id, err := strconv.ParseInt(vars, 10, 64)
 		if err != nil {
+			logger.Error("Invalid list ID format", "user_id", user.ID, "id_param", vars, "error", err, "error_type", fmt.Sprintf("%T", err))
 			http.Error(w, "Invalid list ID", http.StatusBadRequest)
 			return
 		}
 
+		logger.Debug("Calling service to get partial minifig list by ID", "user_id", user.ID, "list_id", id)
 		list, err := handler.service.GetPartialMinifigListByID(id, user)
 		if err != nil {
+			logger.Error("Service error when getting list by ID", "user_id", user.ID, "list_id", id, "error", err, "error_type", fmt.Sprintf("%T", err))
 			http.Error(w, "List not found", http.StatusNotFound)
 			return
 		}
+
+		logger.Debug("Successfully retrieved list from service", "user_id", user.ID, "list_id", id, "list_name", list.Name, "partial_minifigs_count", len(list.PartialMinifigs))
 
 		data := map[string]interface{}{
 			"Title":       list.Name,
@@ -100,17 +132,30 @@ func (handler *PartialMinifigHandler) HandlePartialMinifigListDetail() http.Hand
 			"User":        user,
 		}
 
+		logger.Debug("Template data prepared for list detail", "user_id", user.ID, "list_id", id, "data_keys", getMapKeys(data))
+
 		// Check if this is an HTMX request
-		if r.Header.Get("HX-Request") == "true" {
+		isHTMX := r.Header.Get("HX-Request") == "true"
+		logger.Debug("Request type determined for list detail", "user_id", user.ID, "list_id", id, "is_htmx", isHTMX)
+
+		if isHTMX {
+			logger.Debug("Executing HTMX template for list detail", "user_id", user.ID, "list_id", id, "template", "partial-minifig-list-content")
 			if err := handler.templates.ExecuteTemplate(w, "partial-minifig-list-content", data); err != nil {
+				logger.Error("Template execution error for HTMX list detail request", "user_id", user.ID, "list_id", id, "template", "partial-minifig-list-content", "error_message", err.Error(), "error_type", fmt.Sprintf("%T", err))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
+			} else {
+				logger.Debug("HTMX template executed successfully for list detail", "user_id", user.ID, "list_id", id)
 			}
 			return
 		}
 
 		// If not an HTMX request, render the full page
-		if err := handler.templates.ExecuteTemplate(w, "partial-minifig-list-page", data); err != nil {
+		logger.Debug("Executing full page template for list detail", "user_id", user.ID, "list_id", id, "template", "partial_minifig_list")
+		if err := handler.templates.ExecuteTemplate(w, "partial_minifig_list", data); err != nil {
+			logger.Error("Template execution error for full page list detail request", "user_id", user.ID, "list_id", id, "template", "partial_minifig_list", "error_message", err.Error(), "error_type", fmt.Sprintf("%T", err))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			logger.Debug("Full page template executed successfully for list detail", "user_id", user.ID, "list_id", id)
 		}
 	}
 }
@@ -134,13 +179,8 @@ func (handler *PartialMinifigHandler) HandleCreatePartialMinifigList() http.Hand
 			return
 		}
 
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Error parsing form", http.StatusBadRequest)
-			return
-		}
-
-		name := r.Form.Get("name")
-		description := r.Form.Get("description")
+		name := r.FormValue("name")
+		description := r.FormValue("description")
 
 		if name == "" {
 			http.Error(w, "Name is required", http.StatusBadRequest)
@@ -215,13 +255,8 @@ func (handler *PartialMinifigHandler) HandleUpdatePartialMinifigList() http.Hand
 			return
 		}
 
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Error parsing form", http.StatusBadRequest)
-			return
-		}
-
-		name := r.Form.Get("name")
-		description := r.Form.Get("description")
+		name := r.FormValue("name")
+		description := r.FormValue("description")
 
 		if name == "" {
 			http.Error(w, "Name is required", http.StatusBadRequest)
@@ -292,13 +327,8 @@ func (handler *PartialMinifigHandler) HandleCreatePartialMinifig() http.HandlerF
 			return
 		}
 
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Error parsing form", http.StatusBadRequest)
-			return
-		}
-
-		name := r.Form.Get("name")
-		description := r.Form.Get("description")
+		name := r.FormValue("name")
+		description := r.FormValue("description")
 
 		if name == "" {
 			http.Error(w, "Name is required", http.StatusBadRequest)
@@ -383,13 +413,8 @@ func (handler *PartialMinifigHandler) HandleUpdatePartialMinifig() http.HandlerF
 			return
 		}
 
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Error parsing form", http.StatusBadRequest)
-			return
-		}
-
-		name := r.Form.Get("name")
-		description := r.Form.Get("description")
+		name := r.FormValue("name")
+		description := r.FormValue("description")
 
 		if name == "" {
 			http.Error(w, "Name is required", http.StatusBadRequest)
@@ -467,13 +492,7 @@ func (handler *PartialMinifigHandler) HandleSearchBricklinkItem() http.HandlerFu
 
 		logger.Info("User authenticated for Bricklink search", "user_id", user.ID, "email", user.Email)
 
-		if err := r.ParseForm(); err != nil {
-			logger.Error("Error parsing form for Bricklink search", "user_id", user.ID, "error", err)
-			http.Error(w, "Error parsing form", http.StatusBadRequest)
-			return
-		}
-
-		bricklinkId := r.Form.Get("bricklink_id")
+		bricklinkId := r.FormValue("bricklink_id")
 		if bricklinkId == "" {
 			logger.Warn("Bricklink search attempted without ID", "user_id", user.ID)
 			w.Header().Set("Content-Type", "text/html")
@@ -523,13 +542,7 @@ func (handler *PartialMinifigHandler) HandleGetMinifigPicture() http.HandlerFunc
 			return
 		}
 
-		if err := r.ParseForm(); err != nil {
-			logger.Error("Error parsing form for minifig picture", "user_id", user.ID, "error", err)
-			http.Error(w, "Error parsing form", http.StatusBadRequest)
-			return
-		}
-
-		bricklinkId := r.Form.Get("bricklink_id")
+		bricklinkId := r.FormValue("bricklink_id")
 		if bricklinkId == "" {
 			logger.Warn("Minifig picture request without ID", "user_id", user.ID)
 			http.Error(w, "Bricklink ID is required", http.StatusBadRequest)
@@ -565,14 +578,8 @@ func (handler *PartialMinifigHandler) HandleGetMinifigPricing() http.HandlerFunc
 			return
 		}
 
-		if err := r.ParseForm(); err != nil {
-			logger.Error("Error parsing form for minifig pricing", "user_id", user.ID, "error", err)
-			http.Error(w, "Error parsing form", http.StatusBadRequest)
-			return
-		}
-
-		bricklinkId := r.Form.Get("bricklink_id")
-		condition := r.Form.Get("condition")
+		bricklinkId := r.FormValue("bricklink_id")
+		condition := r.FormValue("condition")
 		if bricklinkId == "" {
 			logger.Warn("Minifig pricing request without ID", "user_id", user.ID)
 			http.Error(w, "Bricklink ID is required", http.StatusBadRequest)
@@ -613,13 +620,7 @@ func (handler *PartialMinifigHandler) HandleGetMinifigParts() http.HandlerFunc {
 			return
 		}
 
-		if err := r.ParseForm(); err != nil {
-			logger.Error("Error parsing form for minifig parts", "user_id", user.ID, "error", err)
-			http.Error(w, "Error parsing form", http.StatusBadRequest)
-			return
-		}
-
-		bricklinkId := r.Form.Get("bricklink_id")
+		bricklinkId := r.FormValue("bricklink_id")
 		if bricklinkId == "" {
 			logger.Warn("Minifig parts request without ID", "user_id", user.ID)
 			http.Error(w, "Bricklink ID is required", http.StatusBadRequest)
@@ -655,16 +656,10 @@ func (handler *PartialMinifigHandler) HandleGetPartPricing() http.HandlerFunc {
 			return
 		}
 
-		if err := r.ParseForm(); err != nil {
-			logger.Error("Error parsing form for part pricing", "user_id", user.ID, "error", err)
-			http.Error(w, "Error parsing form", http.StatusBadRequest)
-			return
-		}
-
-		itemType := r.Form.Get("item_type")
-		itemID := r.Form.Get("item_id")
-		colorIDStr := r.Form.Get("color_id")
-		condition := r.Form.Get("condition")
+		itemType := r.FormValue("item_type")
+		itemID := r.FormValue("item_id")
+		colorIDStr := r.FormValue("color_id")
+		condition := r.FormValue("condition")
 
 		if itemID == "" {
 			logger.Warn("Part pricing request without item ID", "user_id", user.ID)
@@ -723,15 +718,9 @@ func (handler *PartialMinifigHandler) HandleGetPartPicture() http.HandlerFunc {
 			return
 		}
 
-		if err := r.ParseForm(); err != nil {
-			logger.Error("Error parsing form for part picture", "user_id", user.ID, "error", err)
-			http.Error(w, "Error parsing form", http.StatusBadRequest)
-			return
-		}
-
-		itemType := r.Form.Get("item_type")
-		itemID := r.Form.Get("item_id")
-		colorIDStr := r.Form.Get("color_id")
+		itemType := r.FormValue("item_type")
+		itemID := r.FormValue("item_id")
+		colorIDStr := r.FormValue("color_id")
 
 		if itemID == "" {
 			logger.Warn("Part picture request without item ID", "user_id", user.ID)
@@ -785,18 +774,13 @@ func (handler *PartialMinifigHandler) HandleAddMinifigWithParts() http.HandlerFu
 			return
 		}
 
-		if err := r.ParseForm(); err != nil {
-			logger.Error("Error parsing form for add minifig with parts", "user_id", user.ID, "error", err)
-			http.Error(w, "Error parsing form", http.StatusBadRequest)
-			return
-		}
-
-		listIDStr := r.Form.Get("list_id")
-		minifigID := r.Form.Get("minifig_id")
-		selectedPartsJSON := r.Form.Get("selected_parts")
-		referenceID := r.Form.Get("reference_id")
-		condition := r.Form.Get("condition")
-		notes := r.Form.Get("notes")
+		listIDStr := r.FormValue("list_id")
+		minifigID := r.FormValue("minifig_id")
+		minifigName := r.FormValue("minifig_name")
+		selectedPartsJSON := r.FormValue("selected_parts")
+		referenceID := r.FormValue("reference_id")
+		condition := r.FormValue("condition")
+		notes := r.FormValue("notes")
 
 		if listIDStr == "" || minifigID == "" || selectedPartsJSON == "" {
 			logger.Warn("Add minifig with parts request missing required fields", "user_id", user.ID)
@@ -834,7 +818,7 @@ func (handler *PartialMinifigHandler) HandleAddMinifigWithParts() http.HandlerFu
 		}
 
 		// Add minifig with parts using the service
-		updatedList, err := handler.service.AddMinifigWithParts(listID, minifigID, refID, cond, notesPtr, selectedParts, user)
+		err = handler.service.AddMinifigWithPartsNoReturn(listID, minifigID, minifigName, refID, cond, notesPtr, selectedParts, user)
 		if err != nil {
 			logger.Error("Failed to add minifig with parts", "user_id", user.ID, "list_id", listID, "minifig_id", minifigID, "error", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -843,96 +827,9 @@ func (handler *PartialMinifigHandler) HandleAddMinifigWithParts() http.HandlerFu
 
 		logger.Info("Successfully added minifig with parts", "user_id", user.ID, "list_id", listID, "minifig_id", minifigID)
 
-		// Return updated list items section
-		data := map[string]interface{}{
-			"List": updatedList,
-			"User": user,
-		}
-
-		if err := handler.templates.ExecuteTemplate(w, "list-items-section", data); err != nil {
-			logger.Error("Failed to execute template for updated list", "user_id", user.ID, "list_id", listID, "error", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+		// Return success status without data
+		w.WriteHeader(http.StatusOK)
 	}
-}
-
-func (handler *PartialMinifigHandler) HandleMinifigDetailsModalGet() http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Get current user from context (set by auth middleware)
-		user, ok := r.Context().Value(auth.UserContextKey).(*models.User)
-		if !ok {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-
-		// Try to parse form data first, then fall back to query parameters
-		if err := r.ParseForm(); err != nil {
-			logger.Error("Failed to parse form", "error", err)
-		}
-		
-		// Get parameters from form data first, then query parameters as fallback
-		itemID := r.FormValue("item_id")
-		if itemID == "" {
-			itemID = r.URL.Query().Get("item_id")
-		}
-		
-		listIDStr := r.FormValue("list_id")
-		if listIDStr == "" {
-			listIDStr = r.URL.Query().Get("list_id")
-		}
-		
-		partsJSON := r.FormValue("parts")
-		if partsJSON == "" {
-			partsJSON = r.URL.Query().Get("parts")
-		}
-
-		if itemID == "" || listIDStr == "" {
-			logger.Error("Missing required parameters", "item_id", itemID, "list_id", listIDStr)
-			http.Error(w, "Missing required parameters: item_id and list_id", http.StatusBadRequest)
-			return
-		}
-
-		listID, err := strconv.ParseInt(listIDStr, 10, 64)
-		if err != nil {
-			logger.Error("Invalid list_id", "list_id", listIDStr, "error", err)
-			http.Error(w, "Invalid list_id", http.StatusBadRequest)
-			return
-		}
-
-		// Parse parts JSON if provided
-		var parts []map[string]interface{}
-		if partsJSON != "" {
-			if err := json.Unmarshal([]byte(partsJSON), &parts); err != nil {
-				logger.Error("Failed to parse parts JSON", "error", err, "json", partsJSON)
-				http.Error(w, "Invalid parts data", http.StatusBadRequest)
-				return
-			}
-		}
-
-		// Get the list to ensure user has access
-		list, err := handler.service.GetPartialMinifigListByID(listID, user)
-		if err != nil {
-			logger.Error("Failed to get list", "list_id", listID, "user_id", user.ID, "error", err)
-			http.Error(w, "List not found", http.StatusNotFound)
-			return
-		}
-
-		logger.Info("Rendering minifig details modal (GET)", "user_id", user.ID, "item_id", itemID, "list_id", listID, "parts_count", len(parts))
-
-		// Prepare template data
-		data := map[string]interface{}{
-			"ItemID": itemID,
-			"List":   list,
-			"Parts":  parts,
-			"User":   user,
-		}
-
-		// Render the modal template
-		if err := handler.templates.ExecuteTemplate(w, "minifig-details-modal", data); err != nil {
-			logger.Error("Failed to execute modal template", "user_id", user.ID, "error", err)
-			http.Error(w, "Template error", http.StatusInternalServerError)
-		}
-	})
 }
 
 func (handler *PartialMinifigHandler) HandleMinifigDetailsModal() http.HandlerFunc {
@@ -941,13 +838,6 @@ func (handler *PartialMinifigHandler) HandleMinifigDetailsModal() http.HandlerFu
 		user, ok := r.Context().Value(auth.UserContextKey).(*models.User)
 		if !ok {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-
-		// Parse form data
-		if err := r.ParseForm(); err != nil {
-			logger.Error("Failed to parse form", "error", err)
-			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
 
@@ -997,9 +887,18 @@ func (handler *PartialMinifigHandler) HandleMinifigDetailsModal() http.HandlerFu
 		}
 
 		// Render the modal template
-		if err := handler.templates.ExecuteTemplate(w, "minifig-details-modal", data); err != nil {
+		if err := handler.templates.ExecuteTemplate(w, "add-minifig-details-modal", data); err != nil {
 			logger.Error("Failed to execute modal template", "user_id", user.ID, "error", err)
 			http.Error(w, "Template error", http.StatusInternalServerError)
 		}
 	})
+}
+
+// Helper function to get map keys for logging
+func getMapKeys(m map[string]interface{}) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }

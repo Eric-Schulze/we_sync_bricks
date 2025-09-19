@@ -9,7 +9,9 @@ import (
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/auth"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/dashboard"
 	"github.com/eric-schulze/we_sync_bricks/internal/common/services/profile"
+	"github.com/eric-schulze/we_sync_bricks/orders"
 	"github.com/eric-schulze/we_sync_bricks/partial_minifigs"
+	"github.com/eric-schulze/we_sync_bricks/webhooks"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -20,8 +22,11 @@ func initRouter(app *models.App) *chi.Mux {
 	router := chi.NewRouter()
 
 	// Middleware
+	router.Use(middleware.Heartbeat("/ping")) // Health check endpoint
+	router.Use(middleware.RequestID) // Request ID for tracing
 	router.Use(middleware.Logger)    // Chi's built-in logger
 	router.Use(middleware.Recoverer) // Error recovery
+	router.Use(middleware.Timeout(60 * 1000)) // 60 seconds timeout
 
 	// Static files
 	fileServer(router, "/static/", http.Dir("web/static/"))
@@ -46,6 +51,14 @@ func initRouter(app *models.App) *chi.Mux {
 
 	if dashboardHandler, ok := app.DashboardHandler.(*dashboard.DashboardHandler); ok {
 		dashboardHandler.RegisterRoutes(router)
+	}
+
+	if ordersHandler, ok := app.OrdersHandler.(*orders.OrdersHandler); ok {
+		ordersHandler.RegisterRoutes(router)
+	}
+
+	if webhookHandler, ok := app.WebhookHandler.(*webhooks.WebhookHandler); ok {
+		webhookHandler.RegisterRoutes(router)
 	}
 
 	return router
